@@ -1,0 +1,1963 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimating Abundance</title>
+<meta name="description" content="An interactive sandbox for BIOL 342 Ecology: estimating the size of a population you cannot count.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+html { color-scheme: light dark; }
+body { margin: 0; font: 14px system-ui, sans-serif; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<style>
+:root{
+  --ground:#E9EEED; --surface:#FBFCFC; --surface-2:#F1F5F4; --sunk:#F5F8F7;
+  --ink:#0E1A1C; --ink-2:#47595B; --ink-3:#7C8F90;
+  --rule:#D2DBDA; --rule-2:#E3E9E8;
+  --s1:#00998C; --s1-soft:#D5EBE8; --s2:#C2570F; --s2-soft:#F6E3D3; --s3:#6B3FA0;
+  --crit:#BE3A2B; --crit-soft:#F6DCD8;
+  --field:#F4F7F6; --grid:#DDE7E5;
+  --shadow:0 1px 2px rgba(14,26,28,.05), 0 10px 28px -16px rgba(14,26,28,.28);
+  --accent-btn:#00786E; --on-accent:#FFFFFF;
+  --focus:#00998C;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B1112; --surface:#12191B; --surface-2:#182123; --sunk:#0E1517;
+    --ink:#E9F0EF; --ink-2:#9BACAC; --ink-3:#6B7D7E;
+    --rule:#26312F; --rule-2:#1E2829;
+    --s1:#00A899; --s1-soft:#123331; --s2:#D46C24; --s2-soft:#332214; --s3:#9179DE;
+    --crit:#F08A72; --crit-soft:#3A211C;
+    --field:#101819; --grid:#1D2829;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+    --accent-btn:#00A899; --on-accent:#062220;
+    --focus:#00A899;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B1112; --surface:#12191B; --surface-2:#182123; --sunk:#0E1517;
+  --ink:#E9F0EF; --ink-2:#9BACAC; --ink-3:#6B7D7E;
+  --rule:#26312F; --rule-2:#1E2829;
+  --s1:#00A899; --s1-soft:#123331; --s2:#D46C24; --s2-soft:#332214; --s3:#9179DE;
+  --crit:#F08A72; --crit-soft:#3A211C;
+  --field:#101819; --grid:#1D2829;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+  --accent-btn:#00A899; --on-accent:#062220;
+  --focus:#00A899;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Source Serif 4",Georgia,"Times New Roman",serif; text-wrap:balance; margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:3px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1220px; margin:0 auto; padding:0 20px 64px}
+header.top{border-bottom:1px solid var(--rule); background:var(--surface)}
+.top-in{max-width:1220px; margin:0 auto; padding:18px 20px 0; display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; justify-content:space-between}
+h1{font-size:27px; font-weight:600; letter-spacing:-.015em; line-height:1.15; margin-top:2px}
+.lede{color:var(--ink-2); max-width:60ch; margin:8px 0 0; font-size:14.5px}
+.site{display:flex; align-items:flex-end; gap:8px}
+.site label{display:block}
+.site .eyebrow{display:block; margin-bottom:5px}
+input[type=text]{background:var(--sunk); border:1px solid var(--rule); border-radius:5px; padding:7px 9px; width:130px; font-family:"IBM Plex Mono",monospace; font-size:13px; letter-spacing:.04em}
+.btn{background:var(--surface-2); border:1px solid var(--rule); border-radius:5px; padding:7px 12px; cursor:pointer; font-size:13.5px; font-weight:500; transition:background .12s,border-color .12s}
+.btn:hover{background:var(--s1-soft); border-color:var(--s1)}
+.btn.primary{background:var(--accent-btn); border-color:var(--accent-btn); color:var(--on-accent); font-weight:600}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.btn.ghost{background:transparent}
+
+/* ---------- step nav ---------- */
+nav.steps{max-width:1220px; margin:16px auto 0; padding:0 20px; display:flex; gap:2px}
+.step{display:flex; align-items:baseline; gap:8px; padding:9px 15px 11px; border:1px solid transparent; border-bottom:none;
+  border-radius:7px 7px 0 0; background:transparent; cursor:pointer; color:var(--ink-2); font-size:14px; position:relative; top:1px}
+.step .num{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3)}
+.step:hover{color:var(--ink)}
+.step[aria-selected=true]{background:var(--ground); border-color:var(--rule); color:var(--ink); font-weight:600}
+.step[aria-selected=true] .num{color:var(--s1)}
+
+/* ---------- layout ---------- */
+.cols{display:grid; grid-template-columns:298px minmax(0,1fr); gap:22px; margin-top:26px; align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow)}
+aside.rail{position:sticky; top:14px; padding:4px 0}
+@media (max-width:900px){aside.rail{position:static}}
+.group{padding:15px 16px; border-bottom:1px solid var(--rule-2)}
+.group:last-child{border-bottom:none}
+.group > .eyebrow{display:block; margin-bottom:11px}
+.field-row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:5px}
+.field-row .val{font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--s1); font-weight:500}
+.ctl{margin-bottom:14px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{font-size:13.5px; color:var(--ink-2)}
+input[type=range]{width:100%; accent-color:var(--s1); margin:0}
+.seg{display:flex; flex-direction:column; gap:1px}
+.seg button{text-align:left; padding:8px 10px; border:1px solid var(--rule); background:var(--surface-2); cursor:pointer; font-size:13.5px; border-radius:5px}
+.seg button + button{margin-top:4px}
+.seg.seg-row{flex-direction:row; flex-wrap:wrap; gap:6px}
+.seg.seg-row button{flex:1 1 210px}
+.seg.seg-row button + button{margin-top:0}
+.seg button[aria-pressed=true]{background:var(--s1-soft); border-color:var(--s1); font-weight:600}
+.seg small{display:block; color:var(--ink-3); font-size:11.5px; font-weight:400; margin-top:1px}
+.switch{display:flex; gap:9px; align-items:flex-start; padding:6px 0; cursor:pointer}
+.switch input{margin:3px 0 0; accent-color:var(--s2); flex:none}
+.switch span{font-size:13px; line-height:1.4}
+.switch small{display:block; color:var(--ink-3); font-size:11.5px}
+.rail-actions{padding:14px 16px; display:flex; flex-direction:column; gap:8px}
+.spread-cap{margin:7px 0 0; font-size:11.5px; line-height:1.45; color:var(--ink-2)}
+.formula-line{text-align:center; overflow-x:auto; font-size:16px; margin:16px 0 14px; color:var(--s3); letter-spacing:.01em}
+.gloss{margin:0; padding-left:18px}
+.gloss li{margin-bottom:7px; line-height:1.5}
+.gloss b.mono{color:var(--ink); font-size:12.5px}
+table.data td.hi-col{color:var(--s3); font-weight:600}
+.detbox{margin-top:20px; padding-top:16px; border-top:1px solid var(--rule-2)}
+.glossary{margin-top:30px}
+.glossary > summary{font-size:13.5px; font-weight:500; color:var(--ink-2); padding:6px 0}
+.gsecs{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:10px 34px; margin-top:10px}
+.gsec .eyebrow{display:block; margin-bottom:2px; padding-bottom:6px; border-bottom:1px solid var(--rule-2)}
+.gsec dl{margin:0}
+.gsec dt{font-weight:600; font-size:13px; margin-top:11px; font-family:"IBM Plex Mono",monospace}
+.gsec dd{margin:2px 0 0; font-size:12.5px; color:var(--ink-2); line-height:1.5}
+.restored{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:18px 0 0; padding:11px 15px;
+  background:var(--s1-soft); border:1px solid var(--s1); border-radius:8px; font-size:13px; color:var(--ink)}
+.conflevel{margin-top:18px; padding:14px 15px; background:var(--sunk); border:1px solid var(--rule-2); border-radius:8px}
+.conflevel .eyebrow{display:block; margin-bottom:9px}
+.nextup{margin:20px 0 0; padding:11px 14px; border:1px dashed var(--rule); border-radius:7px;
+  font-size:13px; line-height:1.5; color:var(--ink-2)}
+.nextup b{color:var(--ink); font-weight:600}
+.nextup.open{border-style:solid; border-color:var(--s1); background:var(--s1-soft); color:var(--ink)}
+.hint{margin:2px 0 0; font-size:12px; line-height:1.45; color:var(--s2)}
+.hint:empty{display:none}
+.lockstrip{display:flex; flex-direction:column; gap:9px; align-items:flex-start; padding:13px 16px;
+  background:var(--sunk); border-bottom:1px solid var(--rule); border-radius:9px 9px 0 0;
+  font-size:12.5px; line-height:1.45; color:var(--ink-2)}
+.rail.locked .group, .rail.locked .rail-actions{opacity:.6; pointer-events:none}
+.step[disabled]{opacity:.4; cursor:not-allowed}
+.step[disabled]:hover{color:var(--ink-2)}
+@media (max-width:760px){
+  nav.steps{flex-wrap:wrap; gap:5px; padding-bottom:11px}
+  .step{top:0; border-radius:6px; font-size:13px; padding:7px 11px; border-color:transparent}
+  .step[aria-selected=true]{background:var(--s1-soft); border-color:var(--s1)}
+}
+
+/* ---------- stage ---------- */
+.stage{display:flex; flex-direction:column; gap:18px}
+.panel{padding:18px 20px}
+.panel h2{font-size:18px; font-weight:600; letter-spacing:-.01em}
+.panel .sub{color:var(--ink-2); font-size:13.5px; margin:5px 0 0; max-width:66ch}
+.fieldwrap{position:relative; background:var(--field); border-radius:7px; border:1px solid var(--rule); overflow:hidden}
+canvas{display:block; width:100%; height:auto}
+.scalebar{position:absolute; left:12px; bottom:10px; display:flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3)}
+.scalebar i{display:block; height:5px; border:1px solid var(--ink-3); border-top:none; width:60px}
+.legend{display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:12px; font-size:12.5px; color:var(--ink-2)}
+.legend b{display:inline-flex; align-items:center; gap:6px; font-weight:400}
+.dot{width:11px; height:11px; border-radius:50%; flex:none}
+.tally{display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:1px; background:var(--rule-2); border:1px solid var(--rule-2); border-radius:7px; overflow:hidden; margin-top:16px}
+.tile{background:var(--surface); padding:11px 13px}
+.tile .k{font-size:11.5px; color:var(--ink-2); display:flex; align-items:center; gap:6px}
+.tile .v{font-family:"IBM Plex Mono",monospace; font-size:23px; font-weight:500; letter-spacing:-.02em; margin-top:2px; line-height:1.1}
+.tile .v small{font-size:12px; color:var(--ink-3); font-weight:400}
+.tile.hi{background:var(--s1-soft)}
+.tile.warn .v{color:var(--s2)}
+.note{font-size:13px; color:var(--ink-2); background:var(--sunk); border-left:2px solid var(--s1); padding:10px 13px; border-radius:0 5px 5px 0; margin-top:16px}
+.note.alert{border-left-color:var(--s2)}
+.note b{font-weight:600; color:var(--ink)}
+.readout{font-family:"IBM Plex Mono",monospace; font-size:13px; background:var(--sunk); border:1px solid var(--rule-2); border-radius:6px; padding:11px 13px; margin-top:14px; overflow-x:auto}
+.readout .lbl{color:var(--ink-3)}
+.hidden{display:none !important}
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
+table.data{border-collapse:collapse; font-family:"IBM Plex Mono",monospace; font-size:12.5px; width:100%}
+table.data th,table.data td{text-align:right; padding:5px 9px; border-bottom:1px solid var(--rule-2); white-space:nowrap}
+table.data th{color:var(--ink-3); font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:.06em}
+table.data td:first-child,table.data th:first-child{text-align:left}
+.tblscroll{overflow-x:auto; max-width:100%; max-height:260px; overflow-y:auto; margin-top:12px}
+details{margin-top:14px; font-size:13px}
+summary{cursor:pointer; color:var(--ink-2); font-size:13px}
+textarea{width:100%; height:130px; margin-top:9px; font-family:"IBM Plex Mono",monospace; font-size:11px; background:var(--sunk); color:var(--ink); border:1px solid var(--rule); border-radius:5px; padding:8px}
+.guess{display:flex; flex-wrap:wrap; gap:16px 28px; align-items:flex-end; margin-top:20px}
+.guess .g{display:flex; flex-direction:column; gap:8px}
+/* size="6" keeps the input's intrinsic width below the label's, so the column is
+   sized by the label and the box below it spans exactly that width */
+.guess input{width:100%; min-width:0; text-align:right}
+.guess .btn{margin-left:4px}
+svg.chart{display:block; width:100%; height:auto; overflow:visible}
+.chart-title{font-size:14.5px; font-weight:600; font-family:"Source Serif 4",serif}
+.chart-sub{font-size:12.5px; color:var(--ink-2); margin:3px 0 10px; max-width:62ch}
+.tip{position:fixed; pointer-events:none; z-index:40; background:var(--ink); color:var(--ground); font-family:"IBM Plex Mono",monospace; font-size:11.5px; padding:6px 9px; border-radius:5px; opacity:0; transition:opacity .1s; white-space:pre; box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-family:"IBM Plex Mono",monospace; padding:2px 8px; border-radius:20px; border:1px solid var(--rule); background:var(--surface-2); color:var(--ink-2)}
+.pill.ok{background:var(--s1-soft); border-color:var(--s1); color:var(--s1)}
+footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font-size:12.5px; color:var(--ink-3); max-width:74ch}
+@media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div>
+      <span class="eyebrow">BIOL 342 · Ecology · Measuring populations</span>
+      <h1>Estimating abundance</h1>
+      <p class="lede">A 120 × 80 m plot contains a fixed but unknown number of animals, denoted N. No survey encounters all of them. The problem addressed here is to estimate N from a sample and to attach a defensible statement of uncertainty to that estimate.</p>
+    </div>
+    <div class="site">
+      <label><span class="eyebrow">Study site code</span><input type="text" id="seed" value="BIOL342" spellcheck="false" autocomplete="off"></label>
+      <button class="btn" id="newsite">New site</button>
+    </div>
+  </div>
+  <nav class="steps" role="tablist">
+    <button class="step" role="tab" id="tab0" aria-selected="true"><span class="num">01</span> The survey</button>
+    <button class="step" role="tab" id="tab1" aria-selected="false"><span class="num">02</span> A first estimate</button>
+    <button class="step" role="tab" id="tab2" aria-selected="false"><span class="num">03</span> Interval estimation</button>
+    <button class="step" role="tab" id="tab3" aria-selected="false"><span class="num">04</span> Repeated sampling</button>
+    <button class="step" role="tab" id="tab4" aria-selected="false"><span class="num">05</span> Bayesian inference</button>
+  </nav>
+</header>
+
+<div class="wrap">
+<p class="restored hidden" id="restored"></p>
+<div class="cols">
+  <aside class="rail card" id="rail">
+    <div class="lockstrip hidden" id="lockstrip">
+      <span>The design is fixed once a survey has been run, so that sections 2 to 5 all refer to the same set of field data.</span>
+      <button class="btn" id="unlock">Revise the design</button>
+    </div>
+    <div class="group">
+      <span class="eyebrow">Survey method</span>
+      <div class="seg" id="method">
+        <button data-m="mr" aria-pressed="true">Mark–recapture<small>Capture, mark, release, recapture</small></button>
+        <button data-m="quad" aria-pressed="false">Quadrat counts<small>Complete counts on sampled plots</small></button>
+        <button data-m="tran" aria-pressed="false">Line transects<small>Distance sampling along fixed lines</small></button>
+      </div>
+    </div>
+
+    <div class="group" id="g-mr">
+      <span class="eyebrow">Effort</span>
+      <div class="ctl"><div class="field-row"><label for="p1">Capture probability, session 1</label><span class="val" id="p1v">0.30</span></div><input type="range" id="p1" min="0.05" max="0.8" step="0.05" value="0.3"></div>
+      <div class="ctl"><div class="field-row"><label for="p2">Capture probability, session 2</label><span class="val" id="p2v">0.30</span></div><input type="range" id="p2" min="0.05" max="0.8" step="0.05" value="0.3"></div>
+    </div>
+
+    <div class="group hidden" id="g-quad">
+      <span class="eyebrow">Effort</span>
+      <div class="ctl"><div class="field-row"><label for="nq">Number of quadrats</label><span class="val" id="nqv">20</span></div><input type="range" id="nq" min="4" max="80" step="1" value="20"></div>
+      <div class="ctl"><div class="field-row"><label for="qs">Quadrat side</label><span class="val" id="qsv">10 m</span></div><input type="range" id="qs" min="0" max="3" step="1" value="2"></div>
+    </div>
+
+    <div class="group hidden" id="g-tran">
+      <span class="eyebrow">Effort</span>
+      <div class="ctl"><div class="field-row"><label for="nt">Number of transects</label><span class="val" id="ntv">4</span></div><input type="range" id="nt" min="2" max="10" step="1" value="4"></div>
+      <div class="ctl"><div class="field-row"><label for="sig">Detectability (σ)</label><span class="val" id="sigv">7 m</span></div><input type="range" id="sig" min="3" max="15" step="1" value="7"></div>
+    </div>
+
+    <div class="group">
+      <span class="eyebrow">Spatial distribution</span>
+      <div class="seg" id="pattern">
+        <button data-p="rand" aria-pressed="true">Random<small>Positions independent of one another</small></button>
+        <button data-p="clump" aria-pressed="false">Clumped<small>Aggregated, as most species are</small></button>
+        <button data-p="even" aria-pressed="false">Regular<small>Territorial spacing</small></button>
+      </div>
+      <div class="spread">
+        <span class="eyebrow" style="display:block;margin:14px 0 6px">Nearest-neighbour distances</span>
+        <svg class="chart" id="nnchart" viewBox="0 0 262 78" role="img" aria-label="Distribution of nearest-neighbour distances among the animals"></svg>
+        <p class="spread-cap" id="nncap"></p>
+      </div>
+    </div>
+
+    <div class="group" id="g-assump">
+      <span class="eyebrow">Violate an assumption</span>
+      <div id="asm-mr">
+        <label class="switch"><input type="checkbox" id="a-het"><span>Capture probability varies among individuals<small>Heterogeneity</small></span></label>
+        <label class="switch"><input type="checkbox" id="a-trap"><span>Marked animals become easier to catch<small>Behavioural response to trapping</small></span></label>
+        <label class="switch"><input type="checkbox" id="a-mort"><span>Marked animals die or emigrate<small>Losses between sessions</small></span></label>
+        <label class="switch"><input type="checkbox" id="a-imm"><span>Unmarked animals are recruited<small>Additions between sessions</small></span></label>
+        <label class="switch"><input type="checkbox" id="a-loss"><span>Tags are shed<small>Mark loss</small></span></label>
+      </div>
+      <div id="asm-quad" class="hidden">
+        <label class="switch"><input type="checkbox" id="a-bias"><span>Place quadrats where animals appear abundant<small>Non-random placement</small></span></label>
+      </div>
+      <div id="asm-tran" class="hidden">
+        <label class="switch"><input type="checkbox" id="a-nodetect"><span>Assume complete detection within the strip<small>Detection function ignored</small></span></label>
+      </div>
+    </div>
+
+    <div class="rail-actions">
+      <button class="btn primary" id="run">Run the survey</button>
+      <button class="btn ghost" id="reset">Regenerate the population</button>
+      <p class="hint" id="hint"></p>
+    </div>
+  </aside>
+
+  <section class="stage">
+
+    <!-- STEP 1 -->
+    <div id="step0">
+      <div class="card panel">
+        <h2 id="s0h">The study plot</h2>
+        <p class="sub" id="s0sub">Select a survey method and run it. Animals that are never encountered leave no trace in the data; this is the central difficulty in estimating abundance, and every method below is a strategy for working around it.</p>
+        <div class="fieldwrap" style="margin-top:15px"><canvas id="cv"></canvas>
+          <div class="scalebar"><i></i>20 m</div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="tally" id="tally"></div>
+        <div class="note" id="s0note"></div>
+        <div class="detbox hidden" id="c-det">
+          <div class="chart-title">How detection falls off with distance</div>
+          <p class="chart-sub" id="det-sub"></p>
+          <svg class="chart" id="det" viewBox="0 0 760 224" role="img" aria-label="Histogram of perpendicular distances with the fitted detection function"></svg>
+        </div>
+        <details><summary>Raw field data, for analysis in Excel, R or MATLAB</summary>
+          <button class="btn" id="copycsv" style="margin-top:9px">Copy to clipboard</button>
+          <textarea id="csv" readonly></textarea>
+        </details>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step1" class="hidden">
+      <div class="card panel">
+        <h2>The data in hand</h2>
+        <p class="sub">The following is the complete output of the field season. Record a point estimate and a plausible range for N, as would be reported in a paper, before revealing the true value.</p>
+        <div class="readout" id="obs"></div>
+        <div class="guess">
+          <div class="g"><label class="eyebrow" for="gpt">Point estimate of N</label><input type="text" id="gpt" class="mono" inputmode="numeric" size="6"></div>
+          <div class="g"><label class="eyebrow" for="glo">Lower limit</label><input type="text" id="glo" class="mono" inputmode="numeric" size="6"></div>
+          <div class="g"><label class="eyebrow" for="ghi">Upper limit</label><input type="text" id="ghi" class="mono" inputmode="numeric" size="6"></div>
+          <button class="btn primary" id="reveal">Reveal N</button>
+        </div>
+        <div id="revealbox" class="hidden">
+          <div class="tally" id="rtally"></div>
+          <div class="note" id="rnote"></div>
+        </div>
+        <p class="nextup" id="next1"></p>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step2" class="hidden">
+      <div class="card panel">
+        <h2>Which values of N are consistent with the data?</h2>
+        <p class="sub">A point estimate from a single field season cannot be checked against anything. The question is therefore posed in reverse. Take a candidate value of N, simulate the same survey on a population of that size several hundred times, and ask how often a result as extreme as the observed one arises. Candidate values that would rarely produce the observed data are rejected; those that survive form an interval estimate.</p>
+        <div class="ctl" style="margin-top:18px">
+          <div class="field-row"><label for="cand">Candidate population size</label><span class="val" id="candv">—</span></div>
+          <input type="range" id="cand" min="0" max="100" step="1" value="50">
+        </div>
+        <div class="tally" id="candtally"></div>
+        <svg class="chart" id="candchart" viewBox="0 0 760 234" role="img" aria-label="What this candidate population would produce, against what you actually saw"></svg>
+        <div class="note" id="candnote"></div>
+      </div>
+      <div class="card panel">
+        <h2>The confidence belt</h2>
+        <p class="sub">Testing candidates one at a time is laborious, so the procedure is applied across the whole range at once. For each candidate value of N, 400 surveys are simulated and the central <span id="sweep-lvl">95</span>% of the resulting statistics is recorded. The set of candidates whose band contains the observed value constitutes the interval estimate. The construction is due to Neyman (1937) and is known as a confidence belt.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px">
+          <button class="btn primary" id="sweep">Evaluate 28 candidate values of N</button>
+          <span class="pill" id="sweepstate">not yet run</span>
+        </div>
+        <div id="sweepout" class="hidden">
+          <svg class="chart" id="belt" viewBox="0 0 760 330" role="img" aria-label="The range of results each candidate population would produce, against your observed result"></svg>
+          <div class="note" id="beltnote"></div>
+        </div>
+        <p class="nextup" id="next2"></p>
+      </div>
+      <div class="card panel hidden" id="c-formula">
+        <h2>The closed-form estimator</h2>
+        <p class="sub">Published abundance estimates are not obtained by simulation. Standard estimators give the same answer in closed form, and having constructed the interval by enumeration it is now possible to see what those formulae approximate.</p>
+        <div class="tally" id="formula"></div>
+        <div class="note" id="formulanote"></div>
+        <div class="detbox hidden" id="c-detfit">
+          <div class="chart-title">The fitted detection function</div>
+          <p class="chart-sub" id="detfit-sub"></p>
+          <svg class="chart" id="detfit" viewBox="0 0 760 224" role="img" aria-label="Fitted detection function against the true one"></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="step3" class="hidden">
+      <div class="card panel">
+        <h2>The sampling distribution of the estimator</h2>
+        <p class="sub">The same population, the same field design, run again and again. Everything that changes between runs is chance — and chance is what a confidence interval is trying to describe. The design controls are fixed here so that every panel refers to the same set of field data. Section 3 produced a single interval and asked whether it contains the true value. This section asks the question that can actually be answered: how often would a procedure of that kind do so?</p>
+        <div class="conflevel">
+          <span class="eyebrow">Confidence level</span>
+          <div class="seg seg-row" id="conf">
+            <button data-c="90" aria-pressed="false">90%<small>Narrower; fails more often</small></button>
+            <button data-c="95" aria-pressed="true">95%<small>Conventional</small></button>
+            <button data-c="99" aria-pressed="false">99%<small>Wider; fails less often</small></button>
+          </div>
+          <p class="chart-sub" style="margin:9px 0 0">The conventional level of 95% has no special status. It fixes the tolerated rate of failure and therefore the width of the interval, and the setting chosen here applies throughout: to the belt in section 3 and to the credible interval in section 5 as well as to the coverage measured below.</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px">
+          <button class="btn primary" id="rep">Draw 500 replicate surveys</button>
+          <span class="pill" id="repstate">not yet run</span>
+        </div>
+        <div id="repout" class="hidden">
+          <div class="tally" id="stats" style="margin-top:18px"></div>
+          <div class="note" id="repnote"></div>
+        </div>
+        <p class="nextup" id="next3"></p>
+      </div>
+      <div class="card panel hidden" id="c-hist">
+        <div class="chart-title">Distribution of the estimates</div>
+        <p class="chart-sub" id="hist-sub"></p>
+        <svg class="chart" id="hist" viewBox="0 0 760 250" role="img" aria-label="Histogram of population estimates across replicate surveys"></svg>
+      </div>
+      <div class="card panel hidden" id="c-cov">
+        <div class="chart-title" id="cov-title">Interval coverage</div>
+        <p class="chart-sub" id="cov-sub"></p>
+        <svg class="chart" id="cov" viewBox="0 0 760 428" role="img" aria-label="Confidence intervals from 45 replicate surveys against the true population size"></svg>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div id="step4" class="hidden">
+      <div class="card panel">
+        <h2>Inverse probability</h2>
+        <p class="sub">Sections 3 and 4 both evaluate P(data | N): the probability of obtaining particular data if the population were of a given size. This is the direction in which a simulation runs, since a population must be specified before a survey can be drawn from it. The quantity of practical interest is the reverse, P(N | data), and it cannot be obtained without one additional input.</p>
+        <div class="note" id="bayesintro"></div>
+        <span class="eyebrow" style="display:block;margin:20px 0 9px">Prior information</span>
+        <div class="seg seg-row" id="prior"></div>
+        <span class="eyebrow" style="display:block;margin:22px 0 4px">A worked enumeration</span>
+        <p class="chart-sub" id="countcap"></p>
+        <div class="tblscroll"><table class="data" id="counttab"></table></div>
+        <div class="note">
+          The operation carried out in that table — multiplying the number imagined by the proportion that produced the observed result, then dividing by the total — is <b>Bayes' rule</b>, also called Bayes' theorem. It was set out by Thomas Bayes in a paper published in 1763 and developed independently by Laplace shortly afterwards. No part of the remainder of this section is more difficult than the arithmetic in those five rows.
+          <br><br>Each column has a conventional name. The first is the <b>prior</b>, the distribution of belief about N held before the data were collected. The second is the <b>likelihood</b>, the probability of the observed data under each candidate value of N. The third is the <b>posterior</b>, the distribution of belief after the data have been taken into account. Sections 3 and 4 used the likelihood alone; that is why neither could assign a probability to any particular value of N.
+        </div>
+        <div class="tally" id="posttally" style="margin-top:20px"></div>
+        <svg class="chart" id="post" viewBox="0 0 760 300" role="img" aria-label="Prior, likelihood and posterior over the population size"></svg>
+        <div class="note" id="postnote"></div>
+        <details>
+          <summary>Bayes' rule in symbols</summary>
+          <p style="margin:12px 0 0">Bayes' rule is conventionally stated as a formula rather than as a table. The two are equivalent.</p>
+          <p class="formula-line mono">P(N | data) &nbsp;&#8733;&nbsp; P(data | N) &nbsp;&times;&nbsp; P(N)</p>
+          <p style="margin:0 0 8px">The vertical bar is read as <b>"given"</b> or "assuming", and is the only unfamiliar notation involved:</p>
+          <ul class="gloss">
+            <li><b class="mono">P(N)</b>, the prior probability of a population size: the first column of the table, and the only quantity not supplied by the data.</li>
+            <li><b class="mono">P(data | N)</b>, the likelihood: the probability of the observed data given a population of that size, and the second column of the table. Sections 3 and 4 rest entirely on this quantity.</li>
+            <li><b class="mono">P(N | data)</b>, the posterior: the probability of a population size given the observed data, and the final column of the table.</li>
+            <li><b class="mono">&#8733;</b>, "is proportional to". The product of the first two columns gives counts rather than probabilities; division by the column total converts them, which is the step performed in the last column.</li>
+          </ul>
+          <p style="margin:10px 0 0">The enumeration above is an instance of this rule rather than an analogy for it. The notation is a shorthand for the counting, and any application of it can properly be asked the same question that the table made explicit: where the first column came from.</p>
+        </details>
+      </div>
+      <div class="card panel">
+        <h2>Sensitivity to the prior</h2>
+        <p class="sub">Since a prior must contribute something to the result, the relevant question is how much. The control below sets the largest population size the prior admits as possible; the effect of varying it depends on how much information the data themselves carry.</p>
+        <div class="ctl" style="margin-top:16px">
+          <div class="field-row"><label for="cap">Upper bound admitted by the prior</label><span class="val" id="capv">—</span></div>
+          <input type="range" id="cap" min="0" max="100" step="1" value="30">
+        </div>
+        <div class="tally" id="captally"></div>
+        <svg class="chart" id="capchart" viewBox="0 0 760 268" role="img" aria-label="Posterior from your survey against one from a much thinner survey"></svg>
+        <div class="note" id="capnote"></div>
+      </div>
+    </div>
+
+  </section>
+</div>
+<details class="glossary">
+  <summary>Glossary of terms and symbols</summary>
+  <div class="gsecs">
+    <div class="gsec"><span class="eyebrow">Field quantities</span><dl>
+      <dt>N</dt><dd>The size of the population being estimated. It is fixed throughout, and unknown to the observer.</dd>
+      <dt>n₁</dt><dd>The number of animals captured, marked and released in the first session of a mark–recapture study.</dd>
+      <dt>n₂</dt><dd>The number captured in the second session, whether marked or not.</dd>
+      <dt>m₂</dt><dd>The number of marked animals in the second sample. Mark–recapture inference rests on this quantity, which is why studies yielding few recaptures are uninformative.</dd>
+      <dt>quadrat</dt><dd>A plot of fixed area searched completely, all individuals within it being counted.</dd>
+      <dt>transect</dt><dd>A line traversed by the observer, the perpendicular distance to each detected animal being recorded.</dd>
+      <dt>truncation distance (w)</dt><dd>The distance from the line beyond which detections are not recorded. It is set by the observer as a matter of design and is independent of detectability.</dd>
+      <dt>detection scale (σ)</dt><dd>The parameter governing the rate at which detection probability declines with distance from the line. Larger values correspond to better detection at range.</dd>
+      <dt>σ̂</dt><dd>The circumflex denotes a quantity estimated from data rather than known. σ̂ is the value of σ fitted to the observed distances.</dd>
+    </dl></div>
+    <div class="gsec"><span class="eyebrow">Estimation</span><dl>
+      <dt>estimator</dt><dd>A rule for computing a value from data. Several estimators may be available for the same quantity, and they need not perform equally well.</dd>
+      <dt>N̂</dt><dd>An estimate of N, as distinct from N itself.</dd>
+      <dt>bias</dt><dd>The difference between the mean of an estimator over repeated sampling and the quantity it is intended to estimate.</dd>
+      <dt>CV</dt><dd>Coefficient of variation: the standard deviation expressed as a proportion of the mean, permitting comparison between surveys of different magnitude.</dd>
+      <dt>sampling distribution</dt><dd>The distribution of an estimator over repeated application of the same design to the same population. It is displayed in section 4.</dd>
+      <dt>standard error</dt><dd>The standard deviation of a sampling distribution.</dd>
+      <dt>Chapman's estimator</dt><dd>A modification of the Lincoln–Petersen ratio, due to Chapman (1951), which is very nearly unbiased at small recapture numbers where the uncorrected ratio is not.</dd>
+    </dl></div>
+    <div class="gsec"><span class="eyebrow">Interval estimation</span><dl>
+      <dt>confidence interval</dt><dd>A range obtained by a procedure which, applied repeatedly, contains the true value in a stated proportion of cases. The probability statement attaches to the procedure and not to any particular interval.</dd>
+      <dt>confidence level</dt><dd>The proportion of intervals required to contain the true value, conventionally 95%. Higher levels give wider intervals.</dd>
+      <dt>coverage</dt><dd>The proportion of intervals that in fact contain the true value. A procedure whose nominal level is 95% but whose coverage is 78% is misstating its own reliability.</dd>
+      <dt>confidence belt</dt><dd>The construction of section 3, due to Neyman (1937): the interval comprises those parameter values not rejected by a test at the stated level.</dd>
+    </dl></div>
+    <div class="gsec"><span class="eyebrow">Bayesian inference</span><dl>
+      <dt>prior</dt><dd>The distribution of belief about N held before the data were collected.</dd>
+      <dt>likelihood</dt><dd>The probability of the observed data under each candidate value of N.</dd>
+      <dt>posterior</dt><dd>The distribution of belief about N after the data have been incorporated, obtained as the product of prior and likelihood, normalised.</dd>
+      <dt>credible interval</dt><dd>A range containing a stated proportion of the posterior probability. Unlike a confidence interval, it is a statement about N, and it requires a prior.</dd>
+    </dl></div>
+    <div class="gsec"><span class="eyebrow">Spatial pattern</span><dl>
+      <dt>nearest-neighbour distance</dt><dd>The distance from each individual to the nearest other individual.</dd>
+      <dt>Clark–Evans R</dt><dd>The ratio of the observed mean nearest-neighbour distance to that expected under complete spatial randomness (Clark &amp; Evans 1954). Values below 1 indicate aggregation, values near 1 randomness, and values above 1 regular spacing. The expectation used here carries Donnelly's (1978) correction for edge effects.</dd>
+      <dt>aggregated</dt><dd>Individuals occurring in patches, as is typical of most species. Aggregation inflates the variance among quadrat counts without biasing the estimate of density.</dd>
+    </dl></div>
+  </div>
+</details>
+<footer id="foot"></footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Counting what you can't count — BIOL 342 sampling sandbox
+   Study plot: 120 m x 80 m = 9600 m^2 (0.96 ha)
+   ============================================================ */
+const W = 120, H = 80, AREA = W * H;
+const CELL = 0.5, NX = W / CELL, NY = H / CELL;
+
+/* ---------- random numbers ---------- */
+function hash(str){ let h = 2166136261 >>> 0; for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r){ let u = 0, v = 0; while(u === 0) u = r(); while(v === 0) v = r(); return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v); }
+/* Kumaraswamy inverse CDF — closed-form stand-in for a Beta, used for
+   individual differences in catchability */
+function kuma(u, a, b){ return Math.pow(1 - Math.pow(1 - u, 1/b), 1/a); }
+
+/* The confidence level is a choice, not a constant. Everything on the page
+   follows it: the intervals, the belt in part 3, the coverage count in part 4,
+   the credible interval in part 5, and every label that quotes a percentage. */
+let CONF = 0.95;
+const ZTAB = { 90: 1.6449, 95: 1.9600, 99: 2.5758 };
+const TTAB = {
+  90: [6.314,2.920,2.353,2.132,2.015,1.943,1.895,1.860,1.833,1.812,1.796,1.782,1.771,1.761,1.753,1.746,1.740,1.734,1.729,1.725,1.721,1.717,1.714,1.711,1.708,1.706,1.703,1.701,1.699,1.697],
+  95: [12.706,4.303,3.182,2.776,2.571,2.447,2.365,2.306,2.262,2.228,2.201,2.179,2.160,2.145,2.131,2.120,2.110,2.101,2.093,2.086,2.080,2.074,2.069,2.064,2.060,2.056,2.052,2.048,2.045,2.042],
+  99: [63.657,9.925,5.841,4.604,4.032,3.707,3.499,3.355,3.250,3.169,3.106,3.055,3.012,2.977,2.947,2.921,2.898,2.878,2.861,2.845,2.831,2.819,2.807,2.797,2.787,2.779,2.771,2.763,2.756,2.750]
+};
+const cPct = () => Math.round(CONF*100);
+const zq = () => ZTAB[cPct()];
+const tq = df => { const t = TTAB[cPct()]; return df < 1 ? t[0] : (df <= 30 ? t[df-1] : zq()); };
+const cLo = () => (1-CONF)/2, cHi = () => 1-(1-CONF)/2;
+const fmt = (x, d) => (x === null || x === undefined || !isFinite(x)) ? "—" : x.toLocaleString("en-US", {minimumFractionDigits:d===undefined?0:d, maximumFractionDigits:d===undefined?0:d});
+const pct = x => (isFinite(x) ? (x*100).toFixed(1) + "%" : "—");
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const quantile = (sorted, q) => { if(!sorted.length) return NaN; const i = (sorted.length-1)*q, lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi]-sorted[lo])*(i-lo); };
+
+/* ============================================================
+   1. The population — the truth the student never sees
+   ============================================================ */
+function buildPopulation(seedStr, pattern, forceN, light){
+  const r = mulberry32(hash(seedStr + "|pop"));
+  for(let i=0;i<8;i++) r();
+  const N = forceN || (150 + Math.floor(r() * 451));   // 150–600 animals
+  const pts = [];
+  if(pattern === "clump"){
+    const nPar = 6 + Math.floor(r()*8), par = [];
+    for(let i=0;i<nPar;i++) par.push([r()*W, r()*H]);
+    for(let i=0;i<N;i++){
+      const p = par[Math.floor(r()*nPar)];
+      pts.push({ x: clamp(p[0] + gauss(r)*7.5, 0.2, W-0.2), y: clamp(p[1] + gauss(r)*7.5, 0.2, H-0.2) });
+    }
+  } else if(pattern === "even"){
+    // Mitchell's best-candidate, with a lookup grid so each new animal is
+    // compared against ALL of its neighbours, not just the last few placed.
+    // Territories: every animal takes the roomiest of 20 tries.
+    const GC = 5, gx = Math.ceil(W/GC), gy = Math.ceil(H/GC);
+    const cells = Array.from({length: gx*gy}, () => []);
+    const cellOf = (x,y) => Math.min(gy-1, Math.floor(y/GC))*gx + Math.min(gx-1, Math.floor(x/GC));
+    for(let i=0;i<N;i++){
+      let best = null, bestD = -1;
+      for(let k=0;k<20;k++){
+        const c = { x: r()*W, y: r()*H };
+        const ci = Math.min(gx-1, Math.floor(c.x/GC)), cj = Math.min(gy-1, Math.floor(c.y/GC));
+        let d = 1e9;
+        for(let a=Math.max(0,ci-1); a<=Math.min(gx-1,ci+1); a++)
+          for(let b2=Math.max(0,cj-1); b2<=Math.min(gy-1,cj+1); b2++)
+            for(const q of cells[b2*gx+a]){
+              const dx = c.x-q.x, dy = c.y-q.y, dd = dx*dx+dy*dy;
+              if(dd < d) d = dd;
+            }
+        if(d > bestD){ bestD = d; best = c; }
+      }
+      pts.push(best); cells[cellOf(best.x, best.y)].push(best);
+    }
+  } else {
+    for(let i=0;i<N;i++) pts.push({ x: r()*W, y: r()*H });
+  }
+  // individual catchability multipliers (mean 1)
+  const w = [];
+  for(let i=0;i<N;i++) w.push(kuma(r(), 1.1, 3.0));
+  const mw = w.reduce((a,b)=>a+b,0)/N;
+  for(let i=0;i<N;i++) w[i] /= mw;
+
+  // summed-area table on a 0.5 m grid, so quadrat counts are O(1)
+  const sat = new Int32Array((NX+1)*(NY+1));
+  const cnt = new Int32Array(NX*NY);
+  for(const p of pts){
+    const i = Math.min(NX-1, Math.floor(p.x/CELL)), j = Math.min(NY-1, Math.floor(p.y/CELL));
+    cnt[j*NX+i]++;
+  }
+  for(let j=1;j<=NY;j++) for(let i=1;i<=NX;i++)
+    sat[j*(NX+1)+i] = cnt[(j-1)*NX+(i-1)] + sat[(j-1)*(NX+1)+i] + sat[j*(NX+1)+i-1] - sat[(j-1)*(NX+1)+i-1];
+
+  const boxCount = (x0,y0,x1,y1) => {
+    const i0 = Math.round(x0/CELL), j0 = Math.round(y0/CELL), i1 = Math.round(x1/CELL), j1 = Math.round(y1/CELL);
+    return sat[j1*(NX+1)+i1] - sat[j0*(NX+1)+i1] - sat[j1*(NX+1)+i0] + sat[j0*(NX+1)+i0];
+  };
+  if(light) return { N, pts, w, boxCount, pattern, seed: seedStr };
+  // nearest-neighbour distance for every animal — the classic way to tell
+  // clumped from random from evenly spaced
+  const nn = new Float64Array(N);
+  for(let i=0;i<N;i++){
+    let best = Infinity;
+    for(let j=0;j<N;j++){
+      if(i === j) continue;
+      const dx = pts[i].x-pts[j].x, dy = pts[i].y-pts[j].y, d = dx*dx+dy*dy;
+      if(d < best) best = d;
+    }
+    nn[i] = Math.sqrt(best);
+  }
+  const nnMean = nn.reduce((a,b)=>a+b,0)/N;
+  const P = 2*(W+H);                                    // Donnelly's edge correction
+  const nnExp = 0.5*Math.sqrt(AREA/N) + 0.0514*P/N + 0.041*P/Math.pow(N,1.5);
+  return { N, pts, w, boxCount, pattern, seed: seedStr, nn, nnMean, nnExp, R: nnMean/nnExp };
+}
+
+/* ============================================================
+   2. Survey engines — each returns { data, est, draw }
+   est = { Nhat, lo, hi, se, method, alt }
+   ============================================================ */
+
+/* --- 2a. Mark–recapture ------------------------------------ */
+function surveyMR(pop, cfg, r){
+  const N = pop.N;
+  const het = cfg.het, trap = cfg.trap ? 1.8 : 1.0;
+  const p1 = cfg.p1, p2 = cfg.p2;
+  const caught1 = new Uint8Array(N), marked = new Uint8Array(N), gone = new Uint8Array(N), caught2 = new Uint8Array(N);
+  let n1 = 0;
+  for(let i=0;i<N;i++){
+    const pi = clamp(het ? p1*pop.w[i] : p1, 0.002, 0.97);
+    if(r() < pi){ caught1[i] = 1; marked[i] = 1; n1++; }
+  }
+  // between sessions
+  if(cfg.mort) for(let i=0;i<N;i++) if(marked[i] && r() < 0.20) gone[i] = 1;      // handling cost, marked only
+  if(cfg.loss) for(let i=0;i<N;i++) if(marked[i] && r() < 0.15) marked[i] = 0;    // tags fall off
+  const nImm = cfg.imm ? Math.round(N * 0.25) : 0;
+  const imm = [];
+  for(let k=0;k<nImm;k++) imm.push({ x: r()*W, y: r()*H, c2: 0, w: 1 });
+
+  let n2 = 0, m2 = 0;
+  for(let i=0;i<N;i++){
+    if(gone[i]) continue;
+    let pi = het ? p2*pop.w[i] : p2;
+    if(caught1[i]) pi *= trap;
+    pi = clamp(pi, 0.002, 0.97);
+    if(r() < pi){ caught2[i] = 1; n2++; if(marked[i]) m2++; }
+  }
+  for(const a of imm){ if(r() < clamp(p2,0.002,0.97)){ a.c2 = 1; n2++; } }
+
+  const lp = m2 > 0 ? n1*n2/m2 : NaN;
+  const Nc = (n1+1)*(n2+1)/(m2+1) - 1;
+  const varc = (n1+1)*(n2+1)*(n1-m2)*(n2-m2)/((m2+1)*(m2+1)*(m2+2));
+  const se = Math.sqrt(Math.max(varc, 0));
+  return {
+    data: { n1, n2, m2, caught1, marked, caught2, gone, imm },
+    est: { Nhat: Nc, se, lo: Nc - zq()*se, hi: Nc + zq()*se, alt: lp, ok: n1 > 0 && n2 > 0 }
+  };
+}
+
+/* --- 2b. Quadrat counts ------------------------------------
+   The plot is divided into a grid of M non-overlapping quadrats and k of
+   them are drawn at random without replacement. Every animal therefore has
+   exactly the same chance of being counted, which is what makes the
+   scaled-up count an unbiased estimate of N.                              */
+function surveyQuad(pop, cfg, r){
+  const s = cfg.qs, gx = Math.round(W/s), gy = Math.round(H/s), M = gx*gy;
+  const k = Math.min(cfg.nq, M), a = s*s;
+  const idx = []; for(let i=0;i<M;i++) idx.push(i);
+  const chosen = [];
+  for(let q=0;q<k;q++){
+    let best = -1, bestC = -1;
+    const tries = cfg.bias ? Math.min(5, idx.length) : 1;
+    for(let t=0;t<tries;t++){
+      const j = Math.floor(r()*idx.length), id = idx[j];
+      const x = (id % gx)*s, y = Math.floor(id/gx)*s;
+      const c = pop.boxCount(x, y, x+s, y+s);
+      if(c > bestC){ bestC = c; best = j; }
+    }
+    const id = idx[best]; idx[best] = idx[idx.length-1]; idx.pop();
+    chosen.push({ x: (id % gx)*s, y: Math.floor(id/gx)*s, s, c: bestC });
+  }
+  const counts = chosen.map(b => b.c);
+  const mean = counts.reduce((x,y)=>x+y,0)/k;
+  let ss = 0; for(const c of counts) ss += (c-mean)*(c-mean);
+  const v = k > 1 ? ss/(k-1) : mean;
+  const fpc = Math.max(0, 1 - k/M);
+  const Nhat = M*mean, se = M*Math.sqrt(v/k*fpc), sePois = M*Math.sqrt(mean/k*fpc);
+  const t = tq(k-1);
+  return {
+    data: { counts, boxes: chosen, s, k, M, mean, v, sePois, frac: k/M },
+    est: { Nhat, se, lo: Nhat - t*se, hi: Nhat + t*se, alt: null, ok: true,
+           poisLo: Nhat - zq()*sePois, poisHi: Nhat + zq()*sePois }
+  };
+}
+
+/* --- 2c. Line transects (distance sampling) ---------------- */
+function halfNormalMu(sig, w){ // effective strip half-width = integral of g(x) from 0 to w
+  const n = 80, h = w/n; let s = 0;
+  for(let i=0;i<=n;i++){ const x = i*h, g = Math.exp(-x*x/(2*sig*sig)); s += g*(i===0||i===n?1:(i%2?4:2)); }
+  return s*h/3;
+}
+function surveyTran(pop, cfg, r, statOnly){
+  const T = cfg.nt, sig = cfg.sig, spacing = W/T, w = Math.min(12, spacing/2);
+  const off = r()*spacing, lines = [];
+  for(let i=0;i<T;i++) lines.push(off + i*spacing);
+  const dets = [], perLine = new Array(T).fill(0);
+  for(let i=0;i<pop.N;i++){
+    const p = pop.pts[i];
+    let best = 0, bd = 1e9;
+    for(let j=0;j<T;j++){
+      let d = Math.abs(p.x - lines[j]);
+      if(d > W/2) d = W - d;                 // the plot wraps, so every strip
+      if(d < bd){ bd = d; best = j; }        // is sampled equally often
+    }
+    if(bd > w) continue;
+    if(r() < Math.exp(-bd*bd/(2*sig*sig))){ dets.push({ i, line: best, d: bd, x: p.x, y: p.y }); perLine[best]++; }
+  }
+  const n = dets.length, L = T*H;
+  if(statOnly) return { data: { dets, lines, w, T, n }, est: { ok: n > 0 } };
+  let sigHat = sig, mu;
+  if(cfg.naive){
+    mu = w;                                   // pretend every animal within w was seen
+  } else if(n >= 3){
+    let bestLL = -1e18;
+    for(let g=0; g<260; g++){
+      const s = Math.exp(Math.log(0.6) + g*(Math.log(70)-Math.log(0.6))/259);
+      const m = halfNormalMu(s, w);
+      let ll = -n*Math.log(m);
+      for(const d of dets) ll += -d.d*d.d/(2*s*s);
+      if(ll > bestLL){ bestLL = ll; sigHat = s; }
+    }
+    mu = halfNormalMu(sigHat, w);
+  } else { mu = w; }
+
+  const D = n/(2*mu*L), Nhat = D*AREA;
+  const er = n/L;
+  let ss = 0; for(let j=0;j<T;j++){ const e = perLine[j] - er*H; ss += e*e; }
+  const varEr = T > 1 ? T*ss/(L*L*(T-1)) : er*er/Math.max(n,1);
+  const cv2n = er > 0 ? varEr/(er*er) : 1;
+  const cv2mu = cfg.naive ? 0 : (n > 0 ? 1/(2*n) : 1);
+  const cv = Math.sqrt(cv2n + cv2mu);
+  const C = n > 0 ? Math.exp(zq()*Math.sqrt(Math.log(1 + cv*cv))) : 1;
+  return {
+    data: { dets, lines, w, T, n, sigHat, mu, pa: mu/w, perLine },
+    est: { Nhat, se: Nhat*cv, lo: Nhat/C, hi: Nhat*C, alt: null, ok: n > 0 }
+  };
+}
+
+function runSurvey(pop, cfg, r, statOnly){
+  if(cfg.method === "mr") return surveyMR(pop, cfg, r);
+  if(cfg.method === "quad") return surveyQuad(pop, cfg, r);
+  return surveyTran(pop, cfg, r, statOnly);
+}
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   3. State & controls
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const updateGatesLater = () => setTimeout(() => updateGates(), 0);
+const QSIDES = [5, 8, 10, 20];   // sides that tile 120 x 80 m exactly
+const cfg = { method:"mr", pattern:"rand", p1:0.3, p2:0.3, nq:20, qs:10, nt:4, sig:7,
+              het:false, trap:false, mort:false, imm:false, loss:false, bias:false, naive:false };
+let pop = null, surv = null, revealed = false, reps = null, step = 0;
+let survCfg = null;   // the design as it stood when the survey was actually run
+let runIndex = 0;     // surveys are reproducible from (site code, design, run number)
+let guess = null, sweepRes = null;
+let milestone = { swept: false, replicated: false };
+
+const css = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+function hexRgb(hx){
+  const m = hx.replace("#","");
+  const v = m.length === 3 ? m.split("").map(c => c+c).join("") : m;
+  return [0,2,4].map(i => parseInt(v.substr(i,2),16)).join(",");
+}
+
+function readControls(){
+  cfg.p1 = +$("p1").value; cfg.p2 = +$("p2").value;
+  cfg.nq = +$("nq").value; cfg.qs = QSIDES[+$("qs").value];
+  cfg.nt = +$("nt").value; cfg.sig = +$("sig").value;
+  cfg.het = $("a-het").checked; cfg.trap = $("a-trap").checked; cfg.mort = $("a-mort").checked;
+  cfg.imm = $("a-imm").checked; cfg.loss = $("a-loss").checked;
+  cfg.bias = $("a-bias").checked; cfg.naive = $("a-nodetect").checked;
+  $("p1v").textContent = cfg.p1.toFixed(2); $("p2v").textContent = cfg.p2.toFixed(2);
+  const Mq = Math.round(W/cfg.qs)*Math.round(H/cfg.qs);
+  cfg.nq = Math.min(cfg.nq, Mq);
+  $("nqv").textContent = cfg.nq + " of " + Mq; $("qsv").textContent = cfg.qs + " m (" + (cfg.qs*cfg.qs) + " m\u00B2)";
+  $("ntv").textContent = cfg.nt; $("sigv").textContent = cfg.sig + " m";
+}
+function newPopulation(){
+  pop = buildPopulation($("seed").value.trim() || "BIOL342", cfg.pattern);
+  surv = null; survCfg = null; reps = null; revealed = false; guess = null; sweepRes = null; runIndex = 0;
+  milestone = { swept: false, replicated: false };
+  $("revealbox").classList.add("hidden"); $("repout").classList.add("hidden");
+  $("sweepout").classList.add("hidden"); $("c-formula").classList.add("hidden");
+  $("sweepstate").textContent = "not yet run"; $("sweepstate").className = "pill";
+  ["c-hist","c-cov"].forEach(i => $(i).classList.add("hidden"));
+  $("repstate").textContent = "not yet run"; $("repstate").className = "pill";
+  lockRail(false); render(); updateGates(); setStep(0);
+}
+
+/* ============================================================
+   4. The plot, drawn
+   ============================================================ */
+const cv = $("cv"), ctx = cv.getContext("2d");
+function sizeCanvas(){
+  const w = cv.parentElement.clientWidth, h = Math.round(w*H/W), dpr = window.devicePixelRatio || 1;
+  cv.width = w*dpr; cv.height = h*dpr; cv.style.height = h + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w, h, sx: w/W, sy: h/H };
+}
+function drawField(){
+  const g = sizeCanvas(), { w, h, sx, sy } = g;
+  const C = { field: css("--field"), grid: css("--grid"), ink3: css("--ink-3"), ink: css("--ink"),
+              s1: css("--s1"), s2: css("--s2"), s3: css("--s3"), rule: css("--rule") };
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = C.field; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+  for(let x=10;x<W;x+=10){ ctx.beginPath(); ctx.moveTo(x*sx,0); ctx.lineTo(x*sx,h); ctx.stroke(); }
+  for(let y=10;y<H;y+=10){ ctx.beginPath(); ctx.moveTo(0,y*sy); ctx.lineTo(w,y*sy); ctx.stroke(); }
+
+  const dot = (p, r, fill, ring, alpha) => {
+    ctx.globalAlpha = alpha===undefined?1:alpha;
+    ctx.beginPath(); ctx.arc(p.x*sx, p.y*sy, r, 0, 6.2832);
+    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+    if(ring){ ctx.lineWidth = 2; ctx.strokeStyle = ring; ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  };
+  const showAll = revealed;   // only after N has been revealed in section 2
+
+  if(surv && cfg.method === "quad"){
+    for(const b of surv.data.boxes){
+      ctx.fillStyle = C.s1; ctx.globalAlpha = 0.10;
+      ctx.fillRect(b.x*sx, b.y*sy, b.s*sx, b.s*sy); ctx.globalAlpha = 1;
+      ctx.strokeStyle = C.s1; ctx.lineWidth = 1.5;
+      ctx.strokeRect(b.x*sx, b.y*sy, b.s*sx, b.s*sy);
+    }
+  }
+  if(surv && cfg.method === "tran"){
+    const wd = surv.data.w, sg = survCfg ? survCfg.sig : cfg.sig;
+    // the shading IS the detection function: strongest on the line, fading to
+    // nothing at the edge. Its width is the truncation distance, which is a
+    // design choice and does not move when detectability does.
+    const rgb = hexRgb(C.s1);
+    for(const L of surv.data.lines){
+      for(const shift of [-W, 0, W]){          // the plot wraps, so draw the neighbours too
+        const a = (L + shift - wd)*sx, b2 = (L + shift + wd)*sx;
+        if(b2 < 0 || a > w) continue;
+        const grad = ctx.createLinearGradient(a, 0, b2, 0);
+        for(let i=0;i<=24;i++){
+          const t = i/24, d = Math.abs((t*2 - 1)*wd);
+          grad.addColorStop(t, `rgba(${rgb},${(0.17*Math.exp(-d*d/(2*sg*sg))).toFixed(3)})`);
+        }
+        ctx.fillStyle = grad; ctx.fillRect(a, 0, b2-a, h);
+      }
+      ctx.strokeStyle = C.s1; ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+      for(const e of [L-wd, L+wd]){
+        let x = e; if(x < 0) x += W; if(x >= W) x -= W;
+        ctx.beginPath(); ctx.moveTo(x*sx, 0); ctx.lineTo(x*sx, h); ctx.stroke();
+      }
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+      ctx.strokeStyle = C.s1; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(L*sx, 0); ctx.lineTo(L*sx, h); ctx.stroke();
+    }
+  }
+
+  // animals never encountered
+  if(showAll) for(const p of pop.pts) dot(p, 2.2, C.ink3, null, 0.5);
+
+  if(surv && cfg.method === "mr"){
+    const d = surv.data;
+    for(const a of d.imm) if(showAll || a.c2) dot(a, a.c2?3.4:2.1, a.c2?C.s2:C.ink3, null, a.c2?1:0.42);
+    for(let i=0;i<pop.N;i++){
+      const p = pop.pts[i];
+      if(d.gone[i]){ if(showAll){ ctx.strokeStyle = C.ink3; ctx.lineWidth = 1.4; ctx.globalAlpha=.6;
+          ctx.beginPath(); ctx.moveTo(p.x*sx-3,p.y*sy-3); ctx.lineTo(p.x*sx+3,p.y*sy+3);
+          ctx.moveTo(p.x*sx+3,p.y*sy-3); ctx.lineTo(p.x*sx-3,p.y*sy+3); ctx.stroke(); ctx.globalAlpha=1; } continue; }
+      if(d.caught2[i] && d.marked[i]){
+        // A recapture carries both colours. They are separated by a ring of the
+        // field colour, because a thin outline drawn straight onto the fill is
+        // swamped by it at this size and reads as a plain session-2 capture.
+        const cx = p.x*sx, cy = p.y*sy;
+        ctx.beginPath(); ctx.arc(cx, cy, 5.6, 0, 6.2832); ctx.fillStyle = C.field; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 2.7, 0, 6.2832); ctx.fillStyle = C.s1; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 4.6, 0, 6.2832);
+        ctx.lineWidth = 1.9; ctx.strokeStyle = C.s2; ctx.stroke();
+      }
+      else if(d.caught2[i]) dot(p, 3.4, C.s2, null);
+      else if(d.marked[i]) dot(p, 3.4, C.s1, null);
+      else if(d.caught1[i]) dot(p, 3.4, C.s3, null);      // marked but tag lost
+    }
+  } else if(surv && cfg.method === "quad"){
+    for(const b of surv.data.boxes)
+      for(const p of pop.pts)
+        if(p.x >= b.x && p.x < b.x+b.s && p.y >= b.y && p.y < b.y+b.s) dot(p, 3.4, C.s2, null);
+  } else if(surv && cfg.method === "tran"){
+    for(const d of surv.data.dets){
+      const lx = surv.data.lines[d.line];
+      ctx.strokeStyle = C.s2; ctx.globalAlpha = .28; ctx.lineWidth = 1;
+      ctx.beginPath();
+      if(Math.abs(d.x - lx) <= W/2){ ctx.moveTo(d.x*sx, d.y*sy); ctx.lineTo(lx*sx, d.y*sy); }
+      else if(d.x > lx){ ctx.moveTo(d.x*sx, d.y*sy); ctx.lineTo(w, d.y*sy); ctx.moveTo(0, d.y*sy); ctx.lineTo(lx*sx, d.y*sy); }
+      else { ctx.moveTo(d.x*sx, d.y*sy); ctx.lineTo(0, d.y*sy); ctx.moveTo(w, d.y*sy); ctx.lineTo(lx*sx, d.y*sy); }
+      ctx.stroke();
+      ctx.globalAlpha = 1; dot(d, 3.4, C.s2, null);
+    }
+  }
+}
+
+const LEGENDS = {
+  mr: [["--ink-3","Not encountered"],["--s1","Marked in session 1"],["--s2","Captured in session 2"],["ring","Recaptured in session 2"]],
+  quad:[["--ink-3","Outside the sampled quadrats"],["--s2","Counted within a quadrat"],["box","Quadrat searched"]],
+  tran:[["--ink-3","Not detected"],["--s2","Detected from the line"],["band","Detection probability, declining with distance"],["trunc","Truncation distance w; detections beyond it are discarded"]]
+};
+function drawLegend(){
+  const L = LEGENDS[cfg.method].filter(e => revealed || e[0] !== "--ink-3");
+  $("legend").innerHTML = L.map(([c,t]) => {
+    if(c === "ring") return `<b><span class="dot" style="width:7px;height:7px;margin:0 4px;background:var(--s1);box-shadow:0 0 0 2px var(--field),0 0 0 4px var(--s2)"></span>${t}</b>`;
+    if(c === "box")  return `<b><span class="dot" style="border-radius:2px;background:var(--s1-soft);border:1.5px solid var(--s1)"></span>${t}</b>`;
+    if(c === "band") return `<b><span class="dot" style="border-radius:2px;border-left:2px solid var(--s1);background:linear-gradient(90deg,var(--s1-soft),transparent)"></span>${t}</b>`;
+    if(c === "trunc") return `<b><span class="dot" style="border-radius:0;width:2px;border-left:2px dashed var(--s1)"></span>${t}</b>`;
+    return `<b><span class="dot" style="background:var(${c})"></span>${t}</b>`;
+  }).join("") + (cfg.method === "mr" && (survCfg ? survCfg.loss : cfg.loss) ? `<b><span class="dot" style="background:var(--s3)"></span>Tag shed</b>` : "");
+}
+
+/* ============================================================
+   5. Part 1 — tallies and field notes
+   ============================================================ */
+function tile(k, v, sub, cls){ return `<div class="tile ${cls||""}"><div class="k">${k}</div><div class="v">${v}${sub?` <small>${sub}</small>`:""}</div></div>`; }
+
+function renderStep1(){
+  if(!surv){
+    $("tally").innerHTML = tile("Plot area", "9,000", "m²") + tile("True population", "hidden", "") +
+      tile("Animals encountered", "0", "") + tile("Estimate", "—", "");
+    $("s0note").innerHTML = "The plot contains a fixed number of animals. That number is withheld until an estimate has been recorded in section 2, so that the estimate is made from the survey data alone. Run a survey to establish what proportion of the population a realistic effort recovers.";
+    $("csv").value = ""; $("legend").innerHTML = ""; drawField(); return;
+  }
+  drawLegend();
+  const e = surv.est, d = surv.data;
+  let tiles = "", note = "", csv = "";
+  if(cfg.method === "mr"){
+    tiles = tile("Marked, session 1", fmt(d.n1), "n\u2081") + tile("Captured, session 2", fmt(d.n2), "n\u2082") +
+            tile("Of these, already marked", fmt(d.m2), "m\u2082", d.m2 < 5 ? "warn" : "") +
+            tile("Marked fraction of the catch", d.n2 ? pct(d.m2/d.n2) : "\u2014", "m\u2082 / n\u2082", "hi");
+    note = `In the first session ${d.n1} animals were captured, marked and released. In the second, ${d.n2} were captured, of which ${d.m2} carried a mark; the marked fraction of the second sample is therefore ${pct(d.m2/Math.max(d.n2,1))}. ` +
+      `These four numbers are the entire result of the field season. None of them is an estimate of N.` +
+      (d.m2 < 5 ? `<br><br>Note that only ${d.m2} marked animals were recaptured. Any estimate derived from this sample will rest on that small number, and will be correspondingly imprecise. Low recapture rates are the most common source of failure in field applications of this method.` : "") +
+      `<br><br>Before proceeding, vary the capture probabilities and observe which of the four counts respond. The switches on the left violate one assumption of the method at a time; running the survey again after each shows the effect on the raw counts. Section 2 poses the question these counts are meant to answer: given that ${pct(d.m2/Math.max(d.n2,1))} of the second sample was already marked, how large is the population?`;
+    csv = "session,tag_id,x_m,y_m\n";
+    for(let i=0;i<pop.N;i++) if(d.caught1[i]) csv += `1,T${String(i).padStart(4,"0")},${pop.pts[i].x.toFixed(1)},${pop.pts[i].y.toFixed(1)}\n`;
+    for(let i=0;i<pop.N;i++) if(d.caught2[i]) csv += `2,${d.marked[i]?"T"+String(i).padStart(4,"0"):"untagged"},${pop.pts[i].x.toFixed(1)},${pop.pts[i].y.toFixed(1)}\n`;
+    for(const a of d.imm) if(a.c2) csv += `2,untagged,${a.x.toFixed(1)},${a.y.toFixed(1)}\n`;
+  } else if(cfg.method === "quad"){
+    const tot = d.counts.reduce((a,b)=>a+b,0), disp = d.v/Math.max(d.mean, 1e-9);
+    tiles = tile("Quadrats searched", fmt(d.k), "of " + d.M + " in the grid") +
+            tile("Proportion of the plot", pct(d.frac), "") +
+            tile("Animals counted", fmt(tot), "") +
+            tile("Mean per quadrat", d.mean.toFixed(2), "variance " + d.v.toFixed(2), disp > 1.6 ? "warn" : "hi");
+    note = `A random sample of ${d.k} of the ${d.M} quadrats tiling the plot was searched completely, covering ${pct(d.frac)} of the total area and yielding ${tot} animals, a mean of ${d.mean.toFixed(2)} per quadrat. ` +
+      `The variance among quadrats is ${d.v.toFixed(2)}, giving a variance-to-mean ratio of ${disp.toFixed(2)}. ` +
+      (disp > 1.6 ? `A ratio appreciably above 1 indicates aggregation: some quadrats fall within a patch and others between patches. Under a Poisson distribution, which would arise if individuals were positioned independently, the ratio is 1.`
+                  : `A ratio near 1 is consistent with a Poisson distribution, which arises when individuals are positioned independently of one another.`) +
+      `<br><br>Before proceeding, vary the number and size of the quadrats and observe the effect on both quantities. Section 2 poses the question these counts are meant to answer: given ${tot} animals in ${pct(d.frac)} of the plot, how large is the population?`;
+    csv = "quadrat_id,x_min_m,y_min_m,side_m,count\n";
+    d.boxes.forEach((b,i) => csv += `${i+1},${b.x.toFixed(1)},${b.y.toFixed(1)},${b.s},${b.c}\n`);
+  } else {
+    const third = d.w/3;
+    const near = d.dets.filter(x => x.d < third).length, far = d.dets.filter(x => x.d >= 2*third).length;
+    tiles = tile("Transects", fmt(d.T), (d.T*H) + " m of line") +
+            tile("Animals detected", fmt(d.n), "") +
+            tile("Nearest third", fmt(near), "0\u2013" + third.toFixed(1) + " m") +
+            tile("Farthest third", fmt(far), (2*third).toFixed(1) + "\u2013" + d.w.toFixed(1) + " m", "hi");
+    note = `${d.T} transects totalling ${d.T*H} m were walked, yielding ${d.n} detections. Because the lines are positioned without reference to the animals, the population is distributed uniformly with respect to distance from the line, and the near and far thirds of the strip should contain equal numbers. They contain ${near} and ${far} respectively. ` +
+      (far < near*0.8 ? `The deficit in the far third consists of animals that were present within the searched strip but not detected.` : `The two are close, indicating that detection was nearly complete out to the truncation distance.`) +
+      `<br><br>Two distinct widths are involved. The truncation distance w, here ${d.w.toFixed(1)} m either side of the line, is a decision made by the observer about how far out to record, and does not change with detectability. The detection scale \u03C3 governs the rate at which the probability of detection declines with distance <em>within</em> that strip; it is represented by the shading above and by the histogram below. Increasing \u03C3 does not widen the strip, but raises detection within it.` +
+      `<br><br>The lines are systematically spaced with a random starting position, and the plot is treated as wrapping from one edge to the other, so that no strip is truncated by a boundary and every animal has the same probability of falling within a searched strip.`;
+    csv = "detection_id,transect_id,perp_distance_m\n";
+    d.dets.forEach((x,i) => csv += `${i+1},${x.line+1},${x.d.toFixed(2)}\n`);
+  }
+  $("tally").innerHTML = tiles;
+  $("s0note").innerHTML = note;
+  $("c-det").classList.toggle("hidden", cfg.method !== "tran");
+  if(cfg.method === "tran") drawDetection("det", "det-sub", surv.data, false);
+  $("csv").value = csv;
+  drawField();
+}
+
+/* ============================================================
+   6. Part 2 — commit, then reveal
+   ============================================================ */
+function renderStep2(){
+  if(!surv){ $("obs").innerHTML = '<span class="lbl">Run a survey in section 1 first.</span>'; return; }
+  const d = surv.data;
+  let rows = [];
+  if(cfg.method === "mr") rows = [["Marked and released, session 1 (n₁)", d.n1], ["Captured, session 2 (n₂)", d.n2], ["Marked animals among them (m₂)", d.m2]];
+  else if(cfg.method === "quad") rows = [["Quadrats searched", d.k + " of " + d.M], ["Quadrat side", d.s + " m (" + (d.s*d.s) + " m²)"], ["Proportion of plot searched", pct(d.frac)], ["Counts", d.counts.join(", ")]];
+  else rows = [["Transects", d.T], ["Total line length L", (d.T*H) + " m"], ["Truncation distance w", d.w.toFixed(1) + " m"], ["Detections n", d.n], ["Perpendicular distances (m)", d.dets.map(x=>x.d.toFixed(1)).join(", ") || "none"]];
+  $("obs").innerHTML = rows.map(r => `<div><span class="lbl">${r[0]}:</span> ${r[1]}</div>`).join("");
+  if(guess) renderReveal(); else $("revealbox").classList.add("hidden");
+}
+function renderReveal(){
+  if(!guess) return;
+  const g = guess.g, lo = guess.lo, hi = guess.hi;
+  const err = (g - pop.N)/pop.N;
+  const covered = lo !== null && hi !== null && lo <= pop.N && pop.N <= hi;
+  const width = lo !== null && hi !== null ? (hi-lo)/pop.N : null;
+  $("gpt").value = g; if(lo !== null) $("glo").value = lo; if(hi !== null) $("ghi").value = hi;
+  $("revealbox").classList.remove("hidden");
+  $("rtally").innerHTML =
+    tile("True population", fmt(pop.N), "", "hi") +
+    tile("Your point estimate", fmt(g), (err>=0?"+":"") + (err*100).toFixed(1) + "%") +
+    tile("Your interval", (lo!==null&&hi!==null) ? fmt(lo)+"\u2013"+fmt(hi) : "\u2014",
+         covered ? "contains N" : "excludes N", covered ? "" : "warn") +
+    tile("Width of the interval", width !== null ? (width*100).toFixed(0) + "%" : "\u2014", "of true N");
+  $("rnote").innerHTML =
+    `The estimate is ${Math.abs(err*100).toFixed(1)}% ${err >= 0 ? "above" : "below"} the true value of ${pop.N}. ` +
+    (Math.abs(err) < 0.1 ? "This is a reasonable reading of the data. " : "") +
+    `Arriving at a point estimate is the more straightforward half of the problem. The interval is the harder half, and the one just recorded was chosen by judgement rather than derived from anything. ` +
+    (covered ? "It contains the true value on this occasion, but there is no way to distinguish a well-judged interval from a fortunate one on the evidence of a single trial."
+             : "It does not contain the true value. Intervals set by judgement are characteristically too narrow: a narrow interval conveys precision, and the impression of precision is not corrected by the data.") +
+    `<br><br>The animals that were present but not encountered are now shown in section 1, in grey behind those that were.<br><br>Section 3 derives an interval by an explicit procedure, by determining which population sizes could plausibly have produced the observed data.`;
+}
+$("reveal").onclick = () => {
+  if(!surv) return;
+  const g = +$("gpt").value, lo = +$("glo").value, hi = +$("ghi").value;
+  if(!isFinite(g) || g <= 0){ $("gpt").focus(); return; }
+  revealed = true;
+  guess = { g, lo: isFinite(lo) ? lo : null, hi: isFinite(hi) ? hi : null };
+  renderReveal();
+  updateGatesLater();
+  if(step === 0) renderStep1();
+};
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   7. Part 4 — replicate the whole survey
+   ============================================================ */
+function replicate(R, over){
+  const c = Object.assign({}, cfg, over || {});
+  const r = mulberry32(hash(pop.seed + "|rep" + (over ? JSON.stringify(over) : "")));
+  const out = [];
+  for(let i=0;i<R;i++){
+    const s = runSurvey(pop, c, r);
+    if(s.est.ok && isFinite(s.est.Nhat)) out.push({ N: s.est.Nhat, lo: s.est.lo, hi: s.est.hi, alt: s.est.alt });
+  }
+  return out;
+}
+function summarise(a, N){
+  const v = a.map(d => d.N), n = v.length;
+  const mean = v.reduce((x,y)=>x+y,0)/n;
+  let ss = 0, cov = 0;
+  for(const d of a){ ss += (d.N-mean)**2; if(d.lo <= N && N <= d.hi) cov++; }
+  const sd = Math.sqrt(ss/(n-1));
+  const alts = a.map(d => d.alt).filter(x => isFinite(x));
+  return { n, mean, sd, cv: sd/mean, bias: mean-N, relBias: (mean-N)/N,
+           cov: cov/n,
+           altMean: alts.length ? alts.reduce((x,y)=>x+y,0)/alts.length : null,
+           sorted: v.slice().sort((x,y)=>x-y) };
+}
+const REASONS = {
+  het:"individuals differ in catchability, so that animals with low capture probability are under-represented in both samples; the marked fraction of the second sample consequently overstates the sampling fraction, and N is underestimated.",
+  trap:"animals that have been captured once are more readily captured again, which inflates m₂ and depresses the estimate.",
+  mort:"marked animals that die or emigrate cannot be recaptured, which depresses m₂ and inflates the estimate.",
+  imm:"unmarked recruits dilute the marked fraction of the population, so that the estimate refers to a later and larger population than the one marked.",
+  loss:"a shed tag converts a recapture into an apparently unmarked animal, depressing m₂ and inflating the estimate.",
+  bias:"quadrats sited where animals appeared abundant do not constitute a random sample of the plot, and the sample mean therefore estimates the density of the better parts of it.",
+  naive:"undetected animals within the strip are treated as absent, and are omitted from the calculation entirely."
+};
+const ACTIVE = () => Object.keys(REASONS).filter(k => cfg[k] && (
+  (cfg.method === "mr" && ["het","trap","mort","imm","loss"].includes(k)) ||
+  (cfg.method === "quad" && k === "bias") || (cfg.method === "tran" && k === "naive")));
+
+function runReplicates(){
+  const R = 500, a = replicate(R, null);
+  const s = summarise(a, pop.N);
+  reps = { a, s };
+  $("repout").classList.remove("hidden");
+  $("repstate").textContent = R + " replicate surveys";
+  $("repstate").className = "pill ok";
+  const off = Math.abs(s.relBias) > 0.04, under = s.cov < CONF - 0.05;
+  $("stats").innerHTML =
+    tile("True population", fmt(pop.N), "", "hi") +
+    tile("Mean of the estimates", fmt(s.mean), (s.relBias>=0?"+":"") + (s.relBias*100).toFixed(1) + "%", off?"warn":"") +
+    tile("Standard deviation", "±" + fmt(s.sd), "CV " + (s.cv*100).toFixed(1) + "%") +
+    tile("Coverage", (s.cov*100).toFixed(1) + "%", "nominal " + cPct() + "%", under?"warn":"");
+  const act = ACTIVE();
+  let txt = `Over ${s.n} replicate surveys of the same population the estimator averaged <b>${fmt(s.mean,1)}</b> against a true value of <b>${pop.N}</b>, a discrepancy of ${(s.relBias>=0?"+":"")}${(s.relBias*100).toFixed(1)}%. Individual estimates ranged from ${fmt(s.sorted[0])} to ${fmt(s.sorted[s.sorted.length-1])}. `;
+  if(survCfg.method === "mr" && s.altMean !== null)
+    txt += `<br><br>The uncorrected Lincoln–Petersen ratio n₁n₂/m₂ averaged ${fmt(s.altMean,1)} over the same replicates, against ${fmt(s.mean,1)} for Chapman's corrected form. The uncorrected ratio is biased upwards whenever recaptures are few, since m₂ appears in the denominator and cannot fall below one without the ratio becoming undefined. The choice of estimator is a substantive one, and the two are not interchangeable.`;
+  if(act.length) txt += `<br><br>An assumption of the method has been violated: ` + act.map(k => REASONS[k]).join(" ");
+  if(under) txt += `<br><br>The intervals attain a coverage of ${(s.cov*100).toFixed(1)}% against a nominal ${cPct()}%. A confidence interval describes only sampling variability, that is, the consequences of which individuals happened to be captured. It carries no information about whether the estimator is aimed at the correct quantity, so a violated assumption produces intervals that are narrow and wrong rather than appropriately wide.`;
+  else if(s.cov > Math.min(0.995, CONF + 0.035)) txt += `<br><br>Coverage is ${(s.cov*100).toFixed(1)}% against a nominal ${cPct()}%, so the intervals are conservative. The variance estimator assumes ${survCfg.method === "tran" ? "that the transects were positioned at random, whereas they were in fact systematically spaced" : "simple random sampling"}; a systematic arrangement is more efficient than the formula credits, and the resulting interval is wider than necessary. Conservative intervals are the safer error, but they reduce the power to detect real change.`;
+  else if(!act.length) txt += `<br><br>The intervals contain the true value on ${(s.cov*100).toFixed(1)}% of occasions, which is the meaning of the ${cPct()}% level: it is a property of the procedure over repeated application, not of any single interval obtained from it.`;
+  $("repnote").innerHTML = txt;
+  $("repnote").className = "note" + ((off||under) ? " alert" : "");
+  drawHist(s); drawCoverage(a, s);
+  ["c-hist","c-cov"].forEach(i => $(i).classList.remove("hidden"));
+  milestone.replicated = true; saveState(); updateGates();
+}
+$("rep").onclick = runReplicates;
+
+/* ---------- charts ---------- */
+function topRect(x,y,w,h,r){
+  r = Math.min(r, w/2, h);
+  return `M${x},${y+h} L${x},${y+r} Q${x},${y} ${x+r},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${y+h} Z`;
+}
+function legendRow(items, x0, y){
+  let x = x0, out = "";
+  for(const [col, label, dash] of items){
+    out += `<line x1="${x}" y1="${y}" x2="${x+16}" y2="${y}" stroke="${col}" stroke-width="2.2" ${dash?`stroke-dasharray="${dash}"`:""}/>` +
+      `<text x="${x+22}" y="${y+3.8}" fill="var(--ink-2)" font-size="11" text-anchor="start" font-family="IBM Plex Mono, monospace">${label}</text>`;
+    x += 22 + label.length*6.5 + 26;
+  }
+  return out;
+}
+function axisLine(x1,y1,x2,y2){ return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--rule)" stroke-width="1"/>`; }
+function txt(x,y,s,o){ o = o||{};
+  return `<text x="${x}" y="${y}" fill="${o.fill||"var(--ink-2)"}" font-size="${o.size||11}" text-anchor="${o.anchor||"middle"}" font-family="IBM Plex Mono, monospace" ${o.weight?`font-weight="${o.weight}"`:""}>${s}</text>`; }
+
+function drawHist(s){
+  const Wd = 760, Ht = 250, L = 44, R = 16, T = 30, B = 36;
+  const pw = Wd-L-R, ph = Ht-T-B;
+  const lo = Math.min(quantile(s.sorted, 0.004), pop.N*0.92), hi = Math.max(quantile(s.sorted, 0.996), pop.N*1.08);
+  const nb = 28, bw = (hi-lo)/nb, bins = new Array(nb).fill(0);
+  let out = 0;
+  for(const v of s.sorted){ const b = Math.floor((v-lo)/bw); if(b < 0 || b >= nb) out++; else bins[b]++; }
+  const mx = Math.max(...bins);
+  const X = v => L + (v-lo)/(hi-lo)*pw, Y = c => T + ph - c/mx*ph;
+  let g = "";
+  for(let i=0;i<=4;i++){ const y = T + ph - i/4*ph;
+    g += `<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="var(--rule-2)" stroke-width="1"/>` + txt(L-8, y+3.5, Math.round(mx*i/4), {anchor:"end", fill:"var(--ink-3)"}); }
+  let bars = "";
+  for(let i=0;i<nb;i++){
+    if(!bins[i]) continue;
+    const x = X(lo+i*bw)+1, w = pw/nb-2, y = Y(bins[i]);
+    bars += `<path d="${topRect(x, y, w, T+ph-y, 3)}" fill="var(--s1)" data-tip="${Math.round(lo+i*bw)}–${Math.round(lo+(i+1)*bw)} animals\n${bins[i]} of ${s.n} replicates"/>`;
+  }
+  const xt = X(pop.N), xm = X(s.mean);
+  let marks = `<line x1="${xt}" y1="${T-10}" x2="${xt}" y2="${T+ph}" stroke="var(--ink)" stroke-width="2"/>` +
+    txt(xt, T-15, `true N = ${pop.N}`, {fill:"var(--ink)", weight:600, anchor: xt > Wd-120 ? "end" : "middle"});
+  if(Math.abs(xm-xt) > 4)
+    marks += `<line x1="${xm}" y1="${T+8}" x2="${xm}" y2="${T+ph}" stroke="var(--s2)" stroke-width="2" stroke-dasharray="4 3"/>` +
+      txt(xm, T+13, `mean ${fmt(s.mean)}`, {fill:"var(--s2)", weight:600, anchor: xm < xt ? "end" : "start"});
+  let ticks = "";
+  for(let i=0;i<=5;i++){ const v = lo + i*(hi-lo)/5; ticks += txt(X(v), Ht-B+18, Math.round(v), {fill:"var(--ink-3)"}); }
+  $("hist").innerHTML = g + bars + marks + axisLine(L, T+ph, L+pw, T+ph) + ticks +
+    txt(L+pw/2, Ht-4, "estimated population size", {fill:"var(--ink-3)", size:10.5}) +
+    txt(L-34, T-16, "surveys", {anchor:"start", fill:"var(--ink-3)", size:10.5});
+  $("hist-sub").textContent = `All ${s.n} replicates applied the same design to the same population, and no error occurred in any of them. The estimates nevertheless differ, and the full width of this histogram represents the range of results that a single field season could have returned in place of the one obtained.` + (out ? ` ${out} extreme estimates fall beyond the axis.` : "");
+}
+
+function drawCoverage(a, s){
+  const Wd = 760, Ht = 428, L = 34, R = 34, T = 52, B = 34;
+  const pw = Wd-L-R, ph = Ht-T-B, k = 45;
+  const step2 = Math.max(1, Math.floor(a.length/k));
+  const pick = [];
+  for(let i=0;i<a.length && pick.length<k;i+=step2) pick.push(a[i]);
+  pick.sort((x,y)=>x.N-y.N);
+  const los = a.map(d=>d.lo).sort((x,y)=>x-y), his = a.map(d=>d.hi).sort((x,y)=>x-y);
+  const lo = Math.min(quantile(los,0.02), pop.N*0.9), hi = Math.max(quantile(his,0.98), pop.N*1.1);
+  const X = v => L + (clamp(v,lo,hi)-lo)/(hi-lo)*pw;
+  const rowH = ph/pick.length;
+  let rows = "", miss = 0;
+  pick.forEach((d,i) => {
+    const y = T + i*rowH + rowH/2, ok = d.lo <= pop.N && pop.N <= d.hi;
+    if(!ok) miss++;
+    const col = ok ? "var(--ink-3)" : "var(--crit)";
+    rows += `<g data-tip="estimate ${fmt(d.N)}\n${cPct()}% interval ${fmt(Math.max(0,d.lo))} to ${fmt(d.hi)}\n${ok?"contains":"EXCLUDES"} N = ${pop.N}">
+      <rect x="${L}" y="${y-rowH/2}" width="${pw}" height="${rowH}" fill="transparent"/>
+      <line x1="${X(d.lo)}" y1="${y}" x2="${X(d.hi)}" y2="${y}" stroke="${col}" stroke-width="${ok?2:2.5}" stroke-linecap="${ok?"round":"butt"}" ${ok?"":'stroke-dasharray="4 2.5"'} opacity="${ok?0.62:1}"/>
+      ${ok ? `<circle cx="${X(d.N)}" cy="${y}" r="2.6" fill="${col}"/>`
+           : `<path d="M${X(d.N)-3.4},${y-3.4} L${X(d.N)+3.4},${y+3.4} M${X(d.N)+3.4},${y-3.4} L${X(d.N)-3.4},${y+3.4}" stroke="${col}" stroke-width="1.8" stroke-linecap="round"/>`}
+</g>`;
+  });
+  const xt = X(pop.N);
+  const leg = legendRow([["var(--ink-3)","interval contains N"],["var(--crit)","interval excludes N","4 2.5"]], L, T-34);
+  $("cov").innerHTML = leg + rows +
+    `<line x1="${xt}" y1="${T-2}" x2="${xt}" y2="${T+ph+6}" stroke="var(--ink)" stroke-width="2"/>` +
+    txt(xt, T-8, `true N = ${pop.N}`, {fill:"var(--ink)", weight:600}) +
+    axisLine(L, T+ph+6, L+pw, T+ph+6) +
+    [0,0.25,0.5,0.75,1].map(f => txt(L+f*pw, T+ph+22, Math.round(lo+f*(hi-lo)), {fill:"var(--ink-3)"})).join("") +
+    txt(L+pw/2, Ht-2, "estimated population size", {fill:"var(--ink-3)", size:10.5});
+  $("cov-title").textContent = `What "${cPct()}% confident" actually means`;
+  $("cov-sub").innerHTML = `Forty-five of the ${a.length} replicates are shown, each as its own ${cPct()}% interval, ordered by estimate. <b>${miss} of the 45 exclude</b> the true value; across all ${a.length} replicates, ${(s.cov*100).toFixed(1)}% contain it. The true value is fixed throughout; it is the intervals that vary. This is what the ${cPct()}% level asserts: a statement about the long-run behaviour of the procedure, and not about any one interval in hand.`;
+}
+
+
+/* ---------- the population's nearest-neighbour distances ---------- */
+function drawSpread(){
+  if(!pop) return;
+  const Wd = 262, Ht = 78, L = 2, R = 2, T = 8, B = 15, pw = Wd-L-R, ph = Ht-T-B;
+  const v = Array.from(pop.nn).sort((a,b)=>a-b);
+  const hi = Math.max(quantile(v, 0.985), pop.nnExp*1.6), nb = 24, bw = hi/nb;
+  const bins = new Array(nb).fill(0);
+  for(const d of v){ const b = Math.floor(d/bw); if(b >= 0 && b < nb) bins[b]++; }
+  const mx = Math.max(...bins);
+  const X = d => L + Math.min(d, hi)/hi*pw, Y = c => T + ph - c/mx*ph;
+  let bars = "";
+  for(let i=0;i<nb;i++){
+    if(!bins[i]) continue;
+    const x = X(i*bw)+0.5, w = pw/nb-1, y = Y(bins[i]);
+    bars += `<path d="${topRect(x, y, w, T+ph-y, 1.5)}" fill="var(--s1)" data-tip="${(i*bw).toFixed(1)}–${((i+1)*bw).toFixed(1)} m from the nearest other animal\n${bins[i]} animals"/>`;
+  }
+  const xe = X(pop.nnExp);
+  $("nnchart").innerHTML = bars +
+    `<line x1="${xe}" y1="${T-6}" x2="${xe}" y2="${T+ph}" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="3 2.5"/>` +
+    `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
+    txt(L, Ht-3, "0", {anchor:"start", fill:"var(--ink-3)", size:9.5}) +
+    txt(L+pw, Ht-3, hi.toFixed(0) + " m", {anchor:"end", fill:"var(--ink-3)", size:9.5});
+  const R2 = pop.R, word = R2 < 0.85 ? "aggregation" : (R2 > 1.15 ? "regular spacing" : "a pattern indistinguishable from random");
+  $("nncap").innerHTML = `Observed mean ${pop.nnMean.toFixed(1)} m; expected ${pop.nnExp.toFixed(1)} m under complete spatial randomness for ${pop.N} individuals (dashed). Clark–Evans R = ${R2.toFixed(2)}, indicating ${word}.`;
+}
+
+/* ---------- the detection function behind a transect survey ---------- */
+function drawDetection(svgId, subId, d, showFit){
+  const Wd = 760, Ht = 224, L = 46, R = 16, T = 50, B = 40, pw = Wd-L-R, ph = Ht-T-B;
+  const naive = survCfg ? survCfg.naive : cfg.naive, sigTrue = survCfg ? survCfg.sig : cfg.sig;
+  const nb = 16, bw = d.w/nb, bins = new Array(nb).fill(0);
+  for(const x of d.dets){ const b = Math.min(nb-1, Math.floor(x.d/bw)); bins[b]++; }
+  const flat = d.n*bw/d.w;
+  const mx = Math.max(Math.max(...bins), flat*1.25, 1);
+  const X = x => L + x/d.w*pw, Y = c => T + ph - c/mx*ph;
+  let g = "";
+  for(let i=0;i<=3;i++){ const y = T + ph - i/3*ph;
+    g += `<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="var(--rule-2)"/>` + txt(L-8, y+3.5, Math.round(mx*i/3), {anchor:"end", fill:"var(--ink-3)"}); }
+  let bars = "";
+  for(let i=0;i<nb;i++){
+    if(!bins[i]) continue;
+    bars += `<path d="${topRect(X(i*bw)+1, Y(bins[i]), pw/nb-2, T+ph-Y(bins[i]), 3)}" fill="var(--s1-soft)" stroke="var(--rule)" stroke-width="1" data-tip="${(i*bw).toFixed(1)}–${((i+1)*bw).toFixed(1)} m from the line\n${bins[i]} detections"/>`;
+  }
+  const curve = (sig, mu, col, dash) => {
+    const pts = [];
+    for(let i=0;i<=60;i++){ const x = i*d.w/60; pts.push(X(x) + "," + Y(d.n*bw*Math.exp(-x*x/(2*sig*sig))/mu)); }
+    return `<polyline points="${pts.join(" ")}" fill="none" stroke="${col}" stroke-width="2" ${dash?`stroke-dasharray="${dash}"`:""}/>`;
+  };
+  const muTrue = halfNormalMu(sigTrue, d.w), paTrue = muTrue/d.w, items = [];
+  let lines = curve(sigTrue, muTrue, "var(--ink-2)", "5 4");
+  items.push(["var(--ink-2)", `true detection function, σ = ${sigTrue} m`, "5 4"]);
+  if(showFit){
+    if(naive){
+      lines += `<line x1="${L}" y1="${Y(flat)}" x2="${L+pw}" y2="${Y(flat)}" stroke="var(--s2)" stroke-width="2"/>`;
+      items.push(["var(--s2)", "assumed: complete detection"]);
+    } else {
+      lines += curve(d.sigHat, d.mu, "var(--s1)");
+      items.push(["var(--s1)", `fitted, σ̂ = ${d.sigHat.toFixed(1)} m`]);
+    }
+  }
+  $(svgId).innerHTML = g + bars + lines + legendRow(items, L, T-20) +
+    `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
+    [0,0.25,0.5,0.75,1].map(f => txt(L+f*pw, Ht-B+18, (f*d.w).toFixed(1), {fill:"var(--ink-3)"})).join("") +
+    txt(L+pw/2, Ht-4, "perpendicular distance from the line (m)", {fill:"var(--ink-3)", size:10.5}) +
+    txt(L-40, T-36, "detections", {anchor:"start", fill:"var(--ink-3)", size:10.5});
+  $(subId).innerHTML = !showFit
+    ? `Because the lines are positioned without reference to the animals, individuals are distributed uniformly with respect to distance, and under perfect detection this histogram would be flat. The decline therefore measures detections lost with distance rather than any property of the population. The dashed curve is the detection function specified by the σ control.`
+    : (naive
+      ? `The orange line represents the assumed model: detection equally probable at ${d.w.toFixed(0)} m as at zero distance. The dashed curve is the detection function actually in operation. Dividing the count by the full strip width rather than by the effective strip width omits the ${pct(1-paTrue)} of animals within the strip that were present but not detected.`
+      : `The fitted curve was estimated by maximum likelihood from the ${d.n} observed distances alone; the true function, shown dashed, was not supplied to it. It recovers σ̂ = ${d.sigHat.toFixed(1)} m against a true value of ${sigTrue} m. The area beneath the fitted curve gives the estimated detection probability within the strip, ${pct(d.pa)}, and division by that proportion constitutes the correction for imperfect detection.`);
+}
+
+/* ============================================================
+   7b. Part 3 — building an interval by inverting a test
+   ============================================================ */
+const STAT = {
+  mr:   { obs: d => d.m2, axis: "tagged animals in the second catch", short: "recaptures" },
+  quad: { obs: d => d.counts.reduce((a,b)=>a+b,0), axis: "animals counted in your quadrats", short: "animals counted" },
+  tran: { obs: d => d.n, axis: "animals detected from your lines", short: "detections" }
+};
+/* draw n2 animals from a population of N containing n1 tagged ones */
+function hyperDraw(N, n1, n2, r){
+  let tagged = n1, left = N, m = 0;
+  for(let i=0;i<n2;i++){ if(r() < tagged/left){ m++; tagged--; } left--; }
+  return m;
+}
+/* the survey as the textbook assumes it works — assumption switches off, because
+   a student inverting a test can only simulate the protocol they believe in */
+const assumedCfg = () => Object.assign({}, survCfg,
+  { het:false, trap:false, mort:false, imm:false, loss:false, bias:false });
+
+function candidateStat(Nc, R, r){
+  const m = survCfg.method, out = [];
+  if(m === "mr"){
+    const n1 = surv.data.n1, n2 = surv.data.n2;
+    if(Nc < Math.max(n1, n2)) return null;
+    for(let i=0;i<R;i++) out.push(hyperDraw(Nc, n1, n2, r));
+  } else {
+    const c = assumedCfg(), per = 40;
+    for(let b=0; b<Math.ceil(R/per); b++){
+      const pp = buildPopulation(pop.seed + "|c" + Nc + "_" + b, survCfg.pattern, Nc, true);
+      for(let i=0;i<per;i++) out.push(STAT[m].obs(runSurvey(pp, c, r, true).data));
+    }
+  }
+  return out;
+}
+function candRange(){
+  const m = survCfg.method, obs = STAT[m].obs(surv.data);
+  const floor = m === "mr" ? Math.max(surv.data.n1, surv.data.n2) : Math.max(obs, 10);
+  const centre = isFinite(surv.est.Nhat) && surv.est.Nhat > 0 ? surv.est.Nhat : floor*3;
+  const lo = Math.max(floor, Math.round(centre*0.45/10)*10);
+  const hi = Math.round(Math.max(centre*2.1, lo*1.6)/10)*10;
+  return [lo, hi];
+}
+function verdict(v, obs){
+  const n = v.length;
+  let le = 0, ge = 0;
+  for(const x of v){ if(x <= obs) le++; if(x >= obs) ge++; }
+  return Math.min(1, 2*Math.min(le/n, ge/n));
+}
+
+function enterInterval(){
+  const [lo, hi] = candRange(), el = $("cand");
+  if(+el.min !== lo || +el.max !== hi){
+    el.min = lo; el.max = hi; el.step = Math.max(1, Math.round((hi-lo)/220));
+    el.value = guess && guess.g >= lo && guess.g <= hi ? Math.round(guess.g) : Math.round((lo+hi)/2);
+  }
+  renderCandidate();
+}
+function renderCandidate(){
+  const Nc = +$("cand").value, m = survCfg.method, obs = STAT[m].obs(surv.data);
+  $("candv").textContent = "N = " + fmt(Nc);
+  const r = mulberry32(hash(pop.seed + "|cand" + Nc));
+  const v = candidateStat(Nc, 240, r);
+  if(!v){ $("candnote").innerHTML = "This candidate is smaller than the number of animals already recorded, and is therefore impossible."; return; }
+  v.sort((a,b)=>a-b);
+  const p = verdict(v, obs), qlo = quantile(v, cLo()), qhi = quantile(v, cHi()), med = quantile(v, 0.5);
+  const ruled = p < 1-CONF;
+  $("candtally").innerHTML =
+    tile("Observed value", fmt(obs), STAT[m].short, "hi") +
+    tile("Expected under this N", fmt(med), "central " + cPct() + "%: " + fmt(qlo) + "–" + fmt(qhi)) +
+    tile("P(result this extreme)", (p*100).toFixed(1) + "%", "two-tailed", ruled ? "warn" : "") +
+    tile("Decision", ruled ? "rejected" : "retained", ruled ? "" : "consistent with the data", ruled ? "warn" : "");
+  drawCandidate(v, obs, Nc, qlo, qhi);
+  $("candnote").innerHTML = ruled
+    ? `If the population contained ${fmt(Nc)} animals, a survey conducted in the same way would produce ${fmt(obs)} ${STAT[m].short} on approximately ${(p*100).toFixed(1)}% of occasions. At the ${cPct()}% level this is sufficiently improbable for the candidate to be rejected: the observed data are difficult to reconcile with a population of that size.`
+    : `If the population contained ${fmt(Nc)} animals, a result such as the one obtained would be unremarkable, occurring on approximately ${(p*100).toFixed(0)}% of occasions. The data provide no grounds for rejecting this candidate, which is therefore retained.<br><br>Note the form of the question. It is not how probable ${fmt(Nc)} is, which the data alone cannot establish, but whether ${fmt(Nc)} could plausibly have generated the observations. Adjust the candidate value until the decision reverses, in both directions, to locate the limits of the interval.`;
+}
+function drawCandidate(v, obs, Nc, qlo, qhi){
+  const Wd = 760, Ht = 234, L = 46, R = 16, T = 54, B = 42, pw = Wd-L-R, ph = Ht-T-B;
+  const m = survCfg.method;
+  const lo = Math.min(v[0], obs), hi = Math.max(v[v.length-1], obs), span = Math.max(hi-lo, 4);
+  let a = lo - span*0.08, b2 = hi + span*0.08, nb = 30, bw = (b2-a)/nb;
+  if(b2 - a <= 46){ a = Math.floor(lo) - 1.5; b2 = Math.ceil(hi) + 1.5; bw = 1; nb = Math.round(b2-a); }
+  const bins = new Array(nb).fill(0);
+  for(const x of v){ const i = Math.min(nb-1, Math.max(0, Math.floor((x-a)/bw))); bins[i]++; }
+  const mx = Math.max(...bins);
+  const X = x => L + (x-a)/(b2-a)*pw, Y = c => T + ph - c/mx*ph;
+  let g = "";
+  for(let i=0;i<=3;i++){ const y = T+ph-i/3*ph; g += `<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="var(--rule-2)"/>`; }
+  let bars = "";
+  for(let i=0;i<nb;i++){
+    if(!bins[i]) continue;
+    const mid = a + (i+0.5)*bw, inside = mid >= qlo && mid <= qhi;
+    bars += `<path d="${topRect(X(a+i*bw)+1, Y(bins[i]), Math.max(1.5, pw/nb-2), T+ph-Y(bins[i]), 3)}" fill="${inside?"var(--s1)":"var(--s1-soft)"}" data-tip="${bw===1?Math.round(a+i*bw+0.5):Math.round(a+i*bw)+"–"+Math.round(a+(i+1)*bw)} ${STAT[m].short}\n${bins[i]} of ${v.length} simulated surveys"/>`;
+  }
+  const xo = X(obs);
+  $("candchart").innerHTML = g + bars +
+    [qlo,qhi].map(q => `<line x1="${X(q)}" y1="${T}" x2="${X(q)}" y2="${T+ph}" stroke="var(--ink-3)" stroke-width="1.4" stroke-dasharray="3 3"/>`).join("") +
+    `<line x1="${xo}" y1="${T-12}" x2="${xo}" y2="${T+ph}" stroke="var(--ink)" stroke-width="2.5"/>` +
+    txt(xo, T-16, `observed: ${fmt(obs)}`, {fill:"var(--ink)", weight:600, anchor: xo > Wd-90 ? "end" : (xo < L+60 ? "start" : "middle")}) +
+    legendRow([["var(--s1)", `simulated results for N = ${fmt(Nc)} (central ${cPct()}% solid)`]], L, T-38) +
+    `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
+    [0,0.25,0.5,0.75,1].map(f => txt(L+f*pw, Ht-B+18, Math.round(a+f*(b2-a)), {fill:"var(--ink-3)"})).join("") +
+    txt(L+pw/2, Ht-4, STAT[m].axis, {fill:"var(--ink-3)", size:10.5});
+}
+
+/* ---------- the sweep: a confidence belt, built by brute force ---------- */
+function crossing(cands, key, obs){
+  for(let i=1;i<cands.length;i++){
+    const a = cands[i-1][key]-obs, b2 = cands[i][key]-obs;
+    if((a <= 0 && b2 >= 0) || (a >= 0 && b2 <= 0)){
+      const t = a === b2 ? 0 : a/(a-b2);
+      return cands[i-1].N + t*(cands[i].N - cands[i-1].N);
+    }
+  }
+  return null;
+}
+function runSweep(){
+  $("sweepstate").textContent = "simulating 11,200 surveys…"; $("sweepstate").className = "pill";
+  setTimeout(() => {
+    const K = 28, R = 400, [lo, hi] = candRange(), m = survCfg.method, obs = STAT[m].obs(surv.data), cands = [];
+    const r = mulberry32(hash(pop.seed + "|sweep"));
+    for(let i=0;i<K;i++){
+      const Nc = Math.round(lo + i*(hi-lo)/(K-1));
+      const v = candidateStat(Nc, R, r);
+      if(!v) continue;
+      v.sort((x,y)=>x-y);
+      cands.push({ N: Nc, q025: quantile(v,cLo()), q50: quantile(v,0.5), q975: quantile(v,cHi()) });
+    }
+    for(const k of ["q025","q50","q975"]){        // 3-point smoother: both curves are
+      const raw = cands.map(c => c[k]);            // monotone in N, so the wobble is noise
+      cands.forEach((c,i) => c[k] = (raw[Math.max(0,i-1)] + raw[i] + raw[Math.min(raw.length-1,i+1)])/3);
+    }
+    const falling = cands[cands.length-1].q50 < cands[0].q50;
+    let nLo = crossing(cands, falling ? "q025" : "q975", obs);
+    let nHi = crossing(cands, falling ? "q975" : "q025", obs);
+    if(nLo !== null && nHi !== null && nLo > nHi){ const t = nLo; nLo = nHi; nHi = t; }
+    sweepRes = { cands, obs, nLo, nHi, lo, hi };
+    $("sweepout").classList.remove("hidden");
+    $("sweepstate").textContent = K + " candidates × " + R + " surveys"; $("sweepstate").className = "pill ok";
+    drawBelt();
+    renderFormula();
+    $("c-formula").classList.remove("hidden");
+    milestone.swept = true; saveState(); updateGates();
+  }, 30);
+}
+$("sweep").onclick = runSweep;
+function drawBelt(){
+  const { cands, obs, nLo, nHi, lo, hi } = sweepRes, m = survCfg.method;
+  const Wd = 760, Ht = 330, L = 54, R = 18, T = 44, B = 96, pw = Wd-L-R, ph = Ht-T-B;
+  const ys = cands.flatMap(c => [c.q025, c.q975]).concat([obs]);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys), pad = (y1-y0)*0.08 || 1;
+  const X = n => L + (n-lo)/(hi-lo)*pw, Y = v => T + ph - (v-(y0-pad))/((y1+pad)-(y0-pad))*ph;
+  let g = "";
+  for(let i=0;i<=4;i++){ const y = T+ph-i/4*ph, val = (y0-pad) + i/4*((y1+pad)-(y0-pad));
+    g += `<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="var(--rule-2)"/>` + txt(L-8, y+3.5, Math.round(val), {anchor:"end", fill:"var(--ink-3)"}); }
+  const band = cands.map(c => X(c.N)+","+Y(c.q975)).join(" ") + " " +
+               cands.slice().reverse().map(c => X(c.N)+","+Y(c.q025)).join(" ");
+  const ribbon = `<polygon points="${band}" fill="var(--s1)" opacity="0.17"/>` +
+    `<polyline points="${cands.map(c => X(c.N)+","+Y(c.q50)).join(" ")}" fill="none" stroke="var(--s1)" stroke-width="2"/>`;
+  const hits = cands.map(c => `<rect x="${X(c.N)-6}" y="${T}" width="12" height="${ph}" fill="transparent" data-tip="N = ${fmt(c.N)}\ncentral ${cPct()}%: ${fmt(c.q025)}–${fmt(c.q975)} ${STAT[m].short}\nobserved ${fmt(obs)}: ${(obs>=c.q025&&obs<=c.q975)?"retained":"rejected"}"/>`).join("");
+  let marks = `<line x1="${L}" y1="${Y(obs)}" x2="${L+pw}" y2="${Y(obs)}" stroke="var(--ink)" stroke-width="2"/>` +
+    txt(L+pw, Y(obs)-8, `observed: ${fmt(obs)}`, {anchor:"end", fill:"var(--ink)", weight:600});
+  let brackets = "";
+  if(nLo !== null && nHi !== null){
+    const bx = T+ph+30;
+    marks += [nLo,nHi].map(n => `<line x1="${X(n)}" y1="${T}" x2="${X(n)}" y2="${T+ph+6}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/>`).join("");
+    brackets += `<path d="M${X(nLo)},${bx-5} L${X(nLo)},${bx} L${X(nHi)},${bx} L${X(nHi)},${bx-5}" fill="none" stroke="var(--s1)" stroke-width="2"/>` +
+      txt((X(nLo)+X(nHi))/2, bx+15, `${cPct()}% interval: ${fmt(nLo)} – ${fmt(nHi)}`, {fill:"var(--s1)", weight:600});
+  }
+  if(guess){
+    const by = T+ph+58;
+    if(guess.lo !== null && guess.hi !== null && guess.hi >= lo && guess.lo <= hi)
+      brackets += `<path d="M${X(clamp(guess.lo,lo,hi))},${by-5} L${X(clamp(guess.lo,lo,hi))},${by} L${X(clamp(guess.hi,lo,hi))},${by} L${X(clamp(guess.hi,lo,hi))},${by-5}" fill="none" stroke="var(--s2)" stroke-width="2"/>`;
+    if(guess.g >= lo && guess.g <= hi)
+      brackets += `<circle cx="${X(guess.g)}" cy="${by}" r="3.5" fill="var(--s2)"/>`;
+    const gx = clamp(X(clamp(guess.lo !== null ? guess.lo : guess.g, lo, hi)), L, Wd-232);
+    brackets += txt(gx, by+16, "estimate recorded in section 2", {anchor:"start", fill:"var(--s2)"});
+  }
+  $("belt").innerHTML = g + ribbon + hits + marks + brackets +
+    `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
+    [0,0.25,0.5,0.75,1].map(f => txt(L+f*pw, T+ph+18, Math.round(lo+f*(hi-lo)), {fill:"var(--ink-3)"})).join("") +
+    legendRow([["var(--s1)", `central ${cPct()}% of simulated results for each candidate N`]], L, T-14) +
+    txt(L-46, T-32, STAT[m].short, {anchor:"start", fill:"var(--ink-3)", size:10.5}) +
+    txt(L+pw/2, Ht-2, "candidate population size", {fill:"var(--ink-3)", size:10.5});
+  const act = ACTIVE();
+  $("beltnote").innerHTML =
+    `The band gives the central ${cPct()}% of results that each candidate population would generate; the horizontal line marks the value actually observed. A candidate is retained wherever the line falls inside the band. ` +
+    (nLo !== null && nHi !== null
+      ? `The retained values run from ${fmt(nLo)} to ${fmt(nHi)}, and this range constitutes a ${cPct()}% confidence interval for N. It has been obtained without recourse to any formula, by determining which values of N are compatible with the evidence.`
+        + (pop.N >= nLo && pop.N <= nHi ? ` On this occasion it contains the true value of ${pop.N}.` : ` It does not contain the true value of ${pop.N}. Approximately ${(100-cPct())} intervals in every hundred are expected to fail in this way; section 4 establishes whether this design fails at about that rate.`)
+      : `The data are compatible with every candidate tested, and the interval is unbounded within the range examined.`) +
+    (act.length ? `<br><br>The construction assumes that the survey conformed to the model. Each simulated survey above was generated under the textbook assumptions of the method, and cannot detect that ${act.map(k => REASONS[k].charAt(0).toLowerCase() + REASONS[k].slice(1)).join(" ")} An interval is only as reliable as the model from which it is derived.` : "") +
+    (m === "tran" ? `<br><br>The detection function has also been treated as known. The closed-form interval below additionally accounts for the fact that it was estimated from the same data, and is correspondingly wider.` : "");
+}
+const FORMULA = {
+  mr:   d => ({ short: "Chapman", name: "Chapman's estimator", expr: "N̂ = (n₁+1)(n₂+1)/(m₂+1) − 1",
+                why: "The marked fraction of the second sample is taken as an estimate of the marked fraction of the population, and N follows by rearrangement. The additive constants are Chapman's (1951) correction, which removes the severe upward bias of the uncorrected ratio when recaptures are few. The standard error is Seber's (1970), derived from the sampling variability of m₂." }),
+  quad: d => ({ short: "scaled-up count", name: "The expanded mean count", expr: "N̂ = M × c̄",
+                why: "The quadrats are a simple random sample of the " + d.M + " that tile the plot, so an unbiased estimate of the total is the sample mean multiplied by " + d.M + ". The standard error is computed from the variance among the sampled counts, with a finite-population correction; no distributional assumption is required." }),
+  tran: d => ({ short: "distance sampling", name: "Distance sampling", expr: "N̂ = n × A / (2 μ̂ L)",
+                why: "Because detection declines with distance, the " + d.n + " detections correspond to an effective strip half-width of μ̂ = " + d.mu.toFixed(1) + " m rather than the full " + d.w.toFixed(1) + " m. The variance combines the observed variation in encounter rate among transects with the uncertainty in the fitted detection function (Buckland et al. 2001)." })
+};
+function renderFormula(){
+  const m = survCfg.method, d = surv.data, e = surv.est, f = FORMULA[m](d);
+  const { nLo, nHi } = sweepRes;
+  const both = nLo !== null && nHi !== null;
+  const overlap = both ? Math.max(0, Math.min(nHi, e.hi) - Math.max(nLo, Math.max(0,e.lo))) / Math.max(nHi-nLo, e.hi-Math.max(0,e.lo)) : null;
+  $("formula").innerHTML =
+    tile("Point estimate", fmt(e.Nhat), f.short, "hi") +
+    tile("Interval, closed form", fmt(Math.max(0,e.lo)) + "–" + fmt(e.hi), cPct() + "%") +
+    tile("Interval, by inversion", both ? fmt(nLo) + "–" + fmt(nHi) : "—", "section 3") +
+    tile("True population", fmt(pop.N), "", "");
+  $("formulanote").innerHTML =
+    `<b>${f.name}.</b> <span class="mono">${f.expr}</span>. ${f.why}` +
+    (both ? `<br><br>The closed-form interval and the interval constructed by inversion ${overlap > 0.7 ? "are in close agreement" : "differ appreciably"}. This is to be expected: the formula is not an alternative principle but an algebraic approximation to the construction carried out above, derived so that the simulation need not be run.` +
+      `<br><br>Where the two differ, the reason is worth identifying. The width of the closed-form interval derives from the variability measured within this one sample, whereas the construction uses the variability that the model predicts for each candidate value of N. ` +
+      (m === "mr" ? `The closed-form interval is also symmetric about the estimate, while the sampling distribution of N̂ is right-skewed; the constructed interval therefore extends further above the estimate than below it.`
+       : survCfg.pattern === "clump" ? `The population is aggregated, and the construction additionally allows for uncertainty about the arrangement of individuals as well as their number, which makes it the more conservative of the two.`
+       : `The two converge as sample size increases; in small samples they may differ appreciably.`) : "");
+  $("c-detfit").classList.toggle("hidden", m !== "tran");
+  if(m === "tran") drawDetection("detfit", "detfit-sub", d, true);
+}
+
+/* ============================================================
+   7c. Part 5 — from P(data | N) to P(N | data)
+   Every design here has a closed-form likelihood, so this part needs
+   no simulation at all: the distributions part 3 was sampling from
+   can simply be written down.
+   ============================================================ */
+function lgamma(x){
+  const g = [676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,
+             12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x < 0.5) return Math.log(Math.PI/Math.sin(Math.PI*x)) - lgamma(1-x);
+  x -= 1; let a = 0.99999999999980993, t = x + 7.5;
+  for(let i=0;i<8;i++) a += g[i]/(x+i+1);
+  return 0.5*Math.log(2*Math.PI) + (x+0.5)*Math.log(t) - t + Math.log(a);
+}
+const lchoose = (n,k) => (k < 0 || k > n || n < 0) ? -Infinity : lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1);
+
+/* what the survey design says about N, written down exactly */
+function likParams(data, c){
+  const m = c.method;
+  if(m === "mr") return { m, n1: data.n1, n2: data.n2, m2: data.m2, floor: Math.max(data.n1, data.n2) };
+  if(m === "quad"){
+    const tot = data.counts.reduce((a,b)=>a+b,0);
+    return { m, count: tot, p: data.k/data.M, floor: tot };
+  }
+  const mu = halfNormalMu(c.sig, data.w);
+  return { m, count: data.n, p: 2*mu*data.T/W, floor: data.n };
+}
+function logLik(L, N){
+  if(N < L.floor) return -Infinity;
+  if(L.m === "mr"){
+    if(L.n2 - L.m2 > N - L.n1) return -Infinity;
+    return lchoose(L.n1, L.m2) + lchoose(N-L.n1, L.n2-L.m2) - lchoose(N, L.n2);
+  }
+  return lchoose(N, L.count) + L.count*Math.log(L.p) + (N-L.count)*Math.log(1-L.p);
+}
+/* three priors a field ecologist might actually hold, all disclosed in numbers */
+function priorSpec(){
+  const r = mulberry32(hash(pop.seed + "|prior"));
+  const lastYear = Math.round(pop.N*(0.72 + 0.56*r())/5)*5;
+  const terr = Math.round(AREA/(pop.N*(0.80 + 0.55*r()))*10)/10;
+  return { lastYear, lastSd: Math.max(15, Math.round(lastYear*0.12/5)*5),
+           terr, capacity: Math.round(AREA/terr/5)*5 };
+}
+function logPrior(kind, N, spec, cap){
+  if(N > cap || N < 1) return -Infinity;
+  if(kind === "flat") return 0;
+  if(kind === "last"){ const z = (N-spec.lastYear)/spec.lastSd; return -0.5*z*z; }
+  return N <= spec.capacity ? 0 : -Infinity;
+}
+function makeGrid(cap){
+  const g = [], lin = Math.min(cap, 4000);
+  for(let N=1;N<=lin;N++) g.push(N);
+  let x = lin;
+  while(x < cap){ x = Math.ceil(x*1.012); g.push(Math.min(x, cap)); }
+  return g;
+}
+function posterior(L, kind, spec, cap){
+  const g = makeGrid(cap), lp = new Float64Array(g.length);
+  let mx = -Infinity;
+  for(let i=0;i<g.length;i++){
+    lp[i] = logLik(L, g[i]) + logPrior(kind, g[i], spec, cap);
+    if(lp[i] > mx) mx = lp[i];
+  }
+  const w = new Float64Array(g.length);
+  let S = 0;
+  for(let i=0;i<g.length;i++){
+    const dN = i === 0 ? 1 : (i === g.length-1 ? g[i]-g[i-1] : (g[i+1]-g[i-1])/2);
+    w[i] = (isFinite(lp[i]) ? Math.exp(lp[i]-mx) : 0) * dN;
+    S += w[i];
+  }
+  const cum = new Float64Array(g.length);
+  let c = 0, q = { lo: g[0], med: g[0], hi: g[g.length-1] }, got = {};
+  for(let i=0;i<g.length;i++){
+    c += w[i]/S; cum[i] = c;
+    if(!got.lo && c >= cLo()){ q.lo = g[i]; got.lo = 1; }
+    if(!got.med && c >= 0.5){ q.med = g[i]; got.med = 1; }
+    if(!got.hi && c >= cHi()){ q.hi = g[i]; got.hi = 1; }
+  }
+  return { g, lp, w, q, mx, cum };
+}
+function postQuantile(o, f){
+  for(let i=0;i<o.cum.length;i++) if(o.cum[i] >= f) return o.g[i];
+  return o.g[o.g.length-1];
+}
+const MEAGRE = { mr: {p1:0.05, p2:0.05}, quad: {nq:4}, tran: {nt:2} };
+let meagre = null;
+function meagreSurvey(){
+  const c = Object.assign({}, assumedCfg(), MEAGRE[survCfg.method]);
+  let s = null;
+  for(let k=0;k<40;k++){                       // a thin season, but not an empty one
+    s = runSurvey(pop, c, mulberry32(hash(pop.seed + "|meagre" + k)));
+    if(c.method !== "mr" || (s.data.m2 >= 1 && s.data.m2 <= 3)) break;
+  }
+  return { L: likParams(s.data, c), data: s.data, cfg: c };
+}
+const CAPS = [];
+for(let i=0;i<=100;i++) CAPS.push(Math.round(Math.pow(10, 3 + i*(Math.log10(200000)-3)/100)/10)*10);
+
+let priorKind = "flat";
+function enterBayes(){
+  const spec = priorSpec();
+  $("prior").innerHTML =
+    `<button data-k="flat" aria-pressed="${priorKind==="flat"}">Uniform<small>All population sizes equally probable</small></button>` +
+    `<button data-k="last" aria-pressed="${priorKind==="last"}">Previous survey<small>${fmt(spec.lastYear)} ± ${fmt(spec.lastSd)}, one year earlier</small></button>` +
+    `<button data-k="cap" aria-pressed="${priorKind==="cap"}">Territory capacity<small>${spec.terr} m² per territory, hence N ≤ ${fmt(spec.capacity)}</small></button>`;
+  $("prior").querySelectorAll("button").forEach(b => b.onclick = () => { priorKind = b.dataset.k; enterBayes(); });
+  meagre = meagreSurvey();
+  renderCounting(likParams(surv.data, survCfg), spec);
+  renderBayes(spec);
+  renderCap(spec);
+}
+function ciNow(){
+  return sweepRes && sweepRes.nLo !== null
+    ? { lo: sweepRes.nLo, hi: sweepRes.nHi, src: "the interval constructed in section 3" }
+    : { lo: Math.max(0, surv.est.lo), hi: surv.est.hi, src: "the formula's interval" };
+}
+function renderCounting(L, spec){
+  const now = posterior(L, priorKind, spec, 200000);
+  const span = postQuantile(now, 0.97) - postQuantile(now, 0.03);
+  const step = span > 400 ? 50 : (span > 150 ? 20 : 10);
+  const sizes = [...new Set([0.05,0.3,0.55,0.85]
+    .map(f => Math.max(L.floor + 1, Math.round(postQuantile(now, f)/step)*step))
+    .concat([Math.round(postQuantile(now, 0.975)*1.3/step)*step]))].sort((a,b)=>a-b);
+  const priorAt = N => Math.exp(logPrior(priorKind, N, spec, 200000));
+  const pmax = Math.max(...sizes.map(priorAt)) || 1;
+  let imagined = 1000, rows = [], tries = 0;
+  do {
+    rows = sizes.map(N => {
+      const started = Math.round(imagined*priorAt(N)/pmax);
+      const lik = Math.exp(logLik(L, N));
+      return { N, started, lived: Math.round(started*lik) };
+    });
+    tries++;
+    if(Math.max(...rows.map(r => r.lived)) >= 25 || tries > 2) break;
+    imagined *= 10;
+  } while(true);
+  const tot = rows.reduce((a,b) => a + b.lived, 0);
+  const unit = {mr:"a survey like yours", quad:"your count", tran:"your number of detections"}[L.m];
+  $("countcap").innerHTML = `Five candidate population sizes are considered. ` +
+    (priorKind === "flat"
+      ? `Under a uniform prior, ${fmt(imagined)} plots are imagined at each size.`
+      : `Plots are imagined in proportion to the prior: ${fmt(imagined)} at the size the prior favours most, and fewer at sizes it considers less probable.`) +
+    ` Each is surveyed, and every plot failing to reproduce ${unit} is discarded. The survivors are then counted.`;
+  $("counttab").innerHTML =
+    `<tr><th>Population size</th><th>Plots imagined</th><th>Of these, number giving the observed result</th><th>Share of survivors</th></tr>` +
+    rows.map(r => `<tr><td>${fmt(r.N)} animals</td><td>${fmt(r.started)}</td><td>${r.started === 0 ? "—" : fmt(r.lived)}</td>` +
+      `<td class="hi-col">${tot ? (r.lived/tot*100).toFixed(1) + "%" : "—"}</td></tr>`).join("") +
+    `<tr><td><b>total</b></td><td>${fmt(rows.reduce((a,b)=>a+b.started,0))}</td><td><b>${fmt(tot)}</b></td><td class="hi-col"><b>100%</b></td></tr>`;
+}
+function renderBayes(spec){
+  const L = likParams(surv.data, survCfg), cap = 200000;
+  const post = posterior(L, priorKind, spec, cap);
+  const flat = posterior(L, "flat", spec, cap);
+  const ci = ciNow();
+  $("bayesintro").innerHTML =
+    `The procedure of section 3 answered a question admitting only two outcomes. For each candidate value of N it asked whether that value could have produced the observed data, rejected those that could not, and treated all the remainder alike. This discards information. Some retained values generate a result like the observed one routinely; others do so only rarely, and were retained merely because "rarely" is not "never". The former have stronger support than the latter, and a satisfactory method should reflect that.` +
+    `<br><br>Weighting the candidates requires a count, and a count requires a starting stock. Consider a thousand hypothetical plots containing 400 animals, a thousand containing 550, a thousand containing 700, and so on. Survey every one of them, and discard every plot whose survey did not reproduce the observed result. The distribution of population sizes among the plots that remain is the quantity sought: the probability of each value of N given the data.` +
+    `<br><br>The difficulty lies in the first step. The number of plots assumed at each size is not determined by the data. A thousand of each embodies the assumption that all sizes were equally probable beforehand; two thousand near 450 and very few above 700 embodies a different assumption and yields a different result. The choice cannot be avoided, since the surviving stock cannot be assembled without deciding what was placed in it. That assumption is termed the <b>prior</b>, and it is the one component the data cannot supply.`;
+  const shift = (post.q.med - flat.q.med)/Math.max(flat.q.med,1);
+  $("posttally").innerHTML =
+    tile("True population", fmt(pop.N), "", "") +
+    tile(cPct() + "% credible interval", fmt(post.q.lo) + "–" + fmt(post.q.hi), "a statement about N", "hi") +
+    tile(cPct() + "% confidence interval", fmt(ci.lo) + "–" + fmt(ci.hi), "a statement about the procedure") +
+    tile("Shift due to the prior", (shift>=0?"+":"") + (shift*100).toFixed(1) + "%", "relative to uniform", Math.abs(shift) > 0.05 ? "warn" : "");
+  drawPosterior(post, flat, spec, ci);
+  const covB = pop.N >= post.q.lo && pop.N <= post.q.hi, covF = pop.N >= ci.lo && pop.N <= ci.hi;
+  $("postnote").innerHTML =
+    (priorKind === "flat"
+      ? `Because an equal number of plots was assumed at every size, the prior contributes nothing: the posterior has the same shape as the likelihood, and the two curves coincide. The credible interval consequently falls almost exactly where the confidence interval does. <b>The numerical agreement conceals a difference in meaning.</b> The statement "there is a ${cPct()}% probability that N lies between ${fmt(post.q.lo)} and ${fmt(post.q.hi)}" is a correct reading of the posterior. It is not a correct reading of the confidence interval, which asserts only that a procedure of this kind brackets the true value on ${cPct()}% of occasions — the property measured in section 4.`
+      : priorKind === "last"
+        ? `The previous year's estimate of ${fmt(spec.lastYear)} draws the posterior towards itself. ${Math.abs(shift) < 0.02 ? "The effect here is slight, because the current data are informative enough to dominate it." : "The estimate moves by " + Math.abs(shift*100).toFixed(0) + "%, and that displacement originates in the earlier survey rather than in the present one."} A prior constitutes evidence, and using it as such is legitimate; what is not legitimate is failing to declare that it has been used.`
+        : `A territory requirement of ${spec.terr} m² imposes a ceiling of ${fmt(spec.capacity)} on the plot, and the posterior terminates there. ${spec.capacity < pop.N ? `The ceiling lies below the true value of ${pop.N}. The prior has therefore assigned zero probability to the correct answer, and no quantity of data collected under it could recover: multiplying a likelihood by zero yields zero. A prior containing a zero asserts impossibility, which is the strongest claim available in statistics and the easiest to make inadvertently.` : `The ceiling lies above the true value, so it costs nothing in this instance. Had the plot been more crowded than assumed, the same prior would have excluded the correct answer entirely.`}`) +
+    `<br><br>On this occasion the credible interval ${covB ? "contains" : "<b>excludes</b>"} the true value of ${pop.N} and the confidence interval ${covF ? "contains" : "<b>excludes</b>"} it. Neither outcome is informative in isolation, for the reason established in section 4, and the point applies to both kinds of interval.`;
+}
+function drawPosterior(post, flat, spec, ci){
+  const Wd = 760, Ht = 300, L2 = 50, R = 18, T = 44, B = 74, pw = Wd-L2-R, ph = Ht-T-B;
+  const hiN = Math.max(post.q.hi*1.35, flat.q.hi*1.2, pop.N*1.25, ci.hi*1.2);
+  const loN = 0, X = n => L2 + (n-loN)/(hiN-loN)*pw;
+  const series = (o, kind) => {
+    const pts = [];
+    let mx = 0;
+    for(let i=0;i<o.g.length;i++){
+      if(o.g[i] > hiN) break;
+      const v = kind === "prior" ? Math.exp(logPrior(priorKind, o.g[i], spec, 200000)) : (isFinite(o.lp[i]) ? Math.exp(o.lp[i]-o.mx) : 0);
+      pts.push([o.g[i], v]); if(v > mx) mx = v;
+    }
+    return { pts, mx: mx || 1 };
+  };
+  const lik = series(flat, "post"), pst = series(post, "post"), pri = series(post, "prior");
+  const Y = (v, s2) => T + ph - (v/s2.mx)*ph*0.92;
+  const path = (s2) => s2.pts.map(([n,v]) => X(n) + "," + Y(v, s2)).join(" ");
+  let g = `<line x1="${L2}" y1="${T+ph}" x2="${L2+pw}" y2="${T+ph}" stroke="var(--rule)"/>`;
+  const fill = `<polygon points="${X(pst.pts[0][0])},${T+ph} ${path(pst)} ${X(pst.pts[pst.pts.length-1][0])},${T+ph}" fill="var(--s3)" opacity="0.16"/>`;
+  const curves = fill +
+    `<polyline points="${path(pri)}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="5 4"/>` +
+    `<polyline points="${path(lik)}" fill="none" stroke="var(--s2)" stroke-width="5.5" opacity="0.5" stroke-linejoin="round"/>` +
+    `<polyline points="${path(pst)}" fill="none" stroke="var(--s3)" stroke-width="2.5"/>`;
+  const tx = X(pop.N);
+  const marks = `<line x1="${tx}" y1="${T-6}" x2="${tx}" y2="${T+ph}" stroke="var(--ink)" stroke-width="2"/>` +
+    txt(tx, T-12, `true N = ${pop.N}`, {fill:"var(--ink)", weight:600, anchor: tx > Wd-100 ? "end" : "middle"});
+  const b1 = T+ph+26, b2 = T+ph+50;
+  const bracket = (lo, hi, y, col, label) => {
+    const a = X(Math.max(lo,loN)), b3 = X(Math.min(hi,hiN)), lw = label.length*6.3;
+    const bar = `<path d="M${a},${y-5} L${a},${y} L${b3},${y} L${b3},${y-5}" fill="none" stroke="${col}" stroke-width="2"/>`;
+    if(b3 + 10 + lw <= Wd) return bar + txt(b3+10, y+4, label, {anchor:"start", fill:col, size:10.5});
+    if(a - 10 - lw >= 0)    return bar + txt(a-10, y+4, label, {anchor:"end", fill:col, size:10.5});
+    return bar + txt((a+b3)/2, y+16, label, {fill:col, size:10.5});
+  };
+  $("post").innerHTML = g + curves + marks +
+    bracket(post.q.lo, post.q.hi, b1, "var(--s3)", `${cPct()}% credible: ${fmt(post.q.lo)}–${fmt(post.q.hi)}`) +
+    bracket(ci.lo, ci.hi, b2, "var(--s1)", `${cPct()}% confidence: ${fmt(ci.lo)}–${fmt(ci.hi)}`) +
+    [0,0.25,0.5,0.75,1].map(f => txt(L2+f*pw, T+ph+16, Math.round(loN+f*(hiN-loN)), {fill:"var(--ink-3)"})).join("") +
+    legendRow([["var(--ink-2)","prior","5 4"],["var(--s2)","likelihood"],["var(--s3)","posterior"]], L2, T-26) +
+    txt(L2+pw/2, Ht-2, "population size", {fill:"var(--ink-3)", size:10.5});
+}
+function renderCap(spec){
+  const cap = CAPS[+$("cap").value];
+  $("capv").textContent = fmt(cap) + " animals";
+  const rich = posterior(likParams(surv.data, survCfg), "flat", spec, cap);
+  const thin = posterior(meagre.L, "flat", spec, cap);
+  const m = survCfg.method;
+  const evidence = m === "mr" ? `${meagre.data.m2} recapture${meagre.data.m2===1?"":"s"}`
+    : m === "quad" ? `${meagre.data.k} quadrats` : `${meagre.data.T} transects`;
+  $("captally").innerHTML =
+    tile("From the observed survey", fmt(rich.q.lo) + "–" + fmt(rich.q.hi), cPct() + "% credible", "hi") +
+    tile("From a sparse survey", fmt(thin.q.lo) + "–" + fmt(thin.q.hi), evidence,
+         thin.q.hi > cap*0.5 ? "warn" : "") +
+    tile("True population", fmt(pop.N), "") +
+    tile("Upper bound assumed", fmt(cap), "");
+  drawCap(rich, thin, cap);
+  const thinLow = posterior(meagre.L, "flat", spec, Math.max(1000, cap/4));
+  const tracks = thin.q.hi > thinLow.q.hi*1.6;
+  $("capnote").innerHTML = tracks
+    ? `The upper limit obtained from the sparse survey rises as the assumed ceiling is raised, which means that limit is determined by the assumption rather than by the field data. With ${evidence} the observations cannot exclude a very large population, so whatever bound the prior imposes becomes the answer. The interval from the fuller survey is unaffected, the data there being sufficient to bound N from above without assistance.`
+    : (m === "mr"
+      ? `Both intervals are now insensitive to the ceiling: the data are informative enough that the prior is immaterial. Lowering the ceiling far enough will restore its influence.`
+      : `Neither interval responds to the ceiling at any setting, and for this design none ever will. The behaviour is a property of the survey method rather than of Bayesian inference as such. ${m === "quad" ? "The proportion of the plot searched is known exactly" : "The detection function and the length of line walked are both known"}, so the data bound N from above as firmly as from below. Mark–recapture affords no such guarantee: there the sampling fraction is itself unknown and must be inferred from m₂, and when recaptures are few the data place no upper bound on N at all. Selecting mark–recapture, running a low-effort survey and returning to this control will demonstrate the contrast.`);
+}
+function drawCap(rich, thin, cap){
+  const Wd = 760, Ht = 268, L2 = 50, R = 18, T = 42, B = 52, pw = Wd-L2-R, ph = Ht-T-B;
+  const lgx = n => Math.log10(Math.max(n, 100));
+  const x0 = 2, x1 = Math.log10(cap), X = n => L2 + (lgx(n)-x0)/(x1-x0)*pw;
+  const series = o => {
+    const pts = []; let mx = 0;
+    for(let i=0;i<o.g.length;i++){ const v = isFinite(o.lp[i]) ? Math.exp(o.lp[i]-o.mx) : 0;
+      pts.push([o.g[i], v]); if(v > mx) mx = v; }
+    return { pts, mx: mx || 1 };
+  };
+  const A = series(rich), B2 = series(thin);
+  const Y = (v, s2) => T + ph - (v/s2.mx)*ph*0.9;
+  const path = s2 => s2.pts.filter(pp => pp[0] >= 100).map(([n,v]) => X(n)+","+Y(v,s2)).join(" ");
+  const ticks = [];
+  for(let e=2; e<=Math.ceil(x1); e++) ticks.push(Math.pow(10,e));
+  const tx = X(pop.N);
+  $("capchart").innerHTML =
+    `<line x1="${L2}" y1="${T+ph}" x2="${L2+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
+    ticks.filter(t => t <= cap).map(t => `<line x1="${X(t)}" y1="${T}" x2="${X(t)}" y2="${T+ph}" stroke="var(--rule-2)"/>` +
+      txt(X(t), T+ph+17, t >= 1000 ? (t/1000)+"k" : t, {fill:"var(--ink-3)"})).join("") +
+    `<polygon points="${X(100)},${T+ph} ${path(B2)} ${X(Math.min(cap, thin.g[thin.g.length-1]))},${T+ph}" fill="var(--s2)" opacity="0.14"/>` +
+    `<polyline points="${path(B2)}" fill="none" stroke="var(--s2)" stroke-width="2"/>` +
+    `<polyline points="${path(A)}" fill="none" stroke="var(--s1)" stroke-width="2.5"/>` +
+    `<line x1="${tx}" y1="${T-6}" x2="${tx}" y2="${T+ph}" stroke="var(--ink)" stroke-width="2"/>` +
+    txt(tx, T-12, `true N = ${pop.N}`, {fill:"var(--ink)", weight:600}) +
+    legendRow([["var(--s1)","observed survey"],["var(--s2)","sparse survey"]], L2, T-26) +
+    txt(L2+pw/2, Ht-4, "population size (logarithmic)", {fill:"var(--ink-3)", size:10.5});
+}
+
+/* ============================================================
+   8. Wiring
+   ============================================================ */
+const tip = $("tip");
+document.addEventListener("mousemove", e => {
+  const t = e.target.closest("[data-tip]");
+  if(!t){ tip.style.opacity = 0; return; }
+  tip.textContent = t.getAttribute("data-tip");
+  tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  tip.style.left = Math.min(window.innerWidth - r.width - 10, e.clientX + 14) + "px";
+  tip.style.top = Math.max(8, e.clientY - r.height - 12) + "px";
+});
+const sameCfg = () => survCfg && JSON.stringify(cfg) === JSON.stringify(survCfg);
+/* how far the student has earned the right to go: each part opens only once the
+   work of the one before it is done */
+function makeSurvey(){
+  return runSurvey(pop, survCfg, mulberry32(hash(pop.seed + "|survey" + runIndex)));
+}
+function reach(){
+  if(!surv || !sameCfg()) return 0;
+  if(!guess) return 1;
+  if(!milestone.swept) return 2;
+  if(!milestone.replicated) return 3;
+  return 4;
+}
+const GATE = {
+  1: "Run a survey in section 1 first.",
+  2: "Record an estimate in section 2 first.",
+  3: "Construct an interval in section 3 first.",
+  4: "Draw the 500 replicate surveys in section 4 first."
+};
+const NEXTUP = {
+  next1: [2, "Section 3 becomes available once an estimate has been recorded and N revealed.",
+             "<b>Section 3 is now available</b>, in which an interval is derived by an explicit procedure rather than by judgement."],
+  next2: [3, "Section 4 becomes available once the candidate values have been evaluated and an interval constructed.",
+             "<b>Section 4 is now available</b>, in which the long-run behaviour of the procedure just used is examined."],
+  next3: [4, "Section 5 becomes available once the replicate surveys have been drawn.",
+             "<b>Section 5 is now available</b>, in which the direction of the probability statement is reversed."]
+};
+function lockRail(on){
+  $("rail").classList.toggle("locked", on);
+  $("lockstrip").classList.toggle("hidden", !on);
+  $("rail").querySelectorAll("input, .seg button, .rail-actions button").forEach(el => el.disabled = on);
+  ["seed","newsite"].forEach(id => $(id).disabled = on);
+}
+function updateGates(){
+  const r = reach();
+  [1,2,3,4].forEach(k => { $("tab"+k).disabled = k > r; $("tab"+k).title = k > r ? GATE[k] : ""; });
+  $("hint").textContent = r > 0 ? ""
+    : (surv ? "The design has been altered. Run the survey again to apply it to sections 2 to 5."
+            : "Run a survey to make sections 2 to 5 available.");
+  for(const id in NEXTUP){
+    const [need, shut, open] = NEXTUP[id], done = r >= need;
+    $(id).innerHTML = done ? open : shut;
+    $(id).classList.toggle("open", done);
+  }
+  if(step > r) setStep(r);
+  saveState();
+}
+function setStep(i){
+  if(i > reach()) return;
+  step = i;
+  lockRail(i > 0);
+  [0,1,2,3,4].forEach(k => { $("tab"+k).setAttribute("aria-selected", k===i); $("step"+k).classList.toggle("hidden", k!==i); });
+  saveState();
+  if(i === 0) renderStep1();
+  if(i === 1) renderStep2();
+  if(i === 2){ enterInterval(); if(milestone.swept && !sweepRes) runSweep(); }
+  if(i === 3 && milestone.replicated && !reps) runReplicates();
+  if(i === 4) enterBayes();
+}
+[0,1,2,3,4].forEach(k => $("tab"+k).onclick = () => setStep(k));
+
+$("method").querySelectorAll("button").forEach(b => b.onclick = () => {
+  cfg.method = b.dataset.m;
+  $("method").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  ["mr","quad","tran"].forEach(m => { $("g-"+m).classList.toggle("hidden", m !== cfg.method); $("asm-"+m).classList.toggle("hidden", m !== cfg.method); });
+  surv = null; survCfg = null; reps = null; revealed = false; guess = null; sweepRes = null;
+  $("revealbox").classList.add("hidden"); $("repout").classList.add("hidden");
+  $("sweepout").classList.add("hidden"); $("c-formula").classList.add("hidden");
+  $("sweepstate").textContent = "not yet run"; $("sweepstate").className = "pill";
+  ["c-hist","c-cov"].forEach(i => $(i).classList.add("hidden"));
+  $("repstate").textContent = "not yet run"; $("repstate").className = "pill";
+  lockRail(false); render(); updateGates(); setStep(0);
+});
+$("pattern").querySelectorAll("button").forEach(b => b.onclick = () => {
+  cfg.pattern = b.dataset.p;
+  $("pattern").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  newPopulation();
+});
+["p1","p2","nq","qs","nt","sig"].forEach(id => $(id).addEventListener("input", () => { readControls(); updateGates(); }));
+["a-het","a-trap","a-mort","a-imm","a-loss","a-bias","a-nodetect"].forEach(id => $(id).addEventListener("change", () => { readControls(); updateGates(); }));
+$("run").onclick = () => {
+  readControls(); revealed = false; guess = null; sweepRes = null; reps = null; meagre = null;
+  milestone = { swept: false, replicated: false };
+  runIndex++; survCfg = JSON.parse(JSON.stringify(cfg)); surv = makeSurvey();
+  $("revealbox").classList.add("hidden");
+  $("sweepout").classList.add("hidden"); $("c-formula").classList.add("hidden");
+  $("sweepstate").textContent = "not yet run"; $("sweepstate").className = "pill";
+  $("repout").classList.add("hidden"); ["c-hist","c-cov"].forEach(i => $(i).classList.add("hidden"));
+  $("repstate").textContent = "not yet run"; $("repstate").className = "pill";
+  renderStep1(); updateGates();
+};
+$("cap").addEventListener("input", () => { clearTimeout(window._pt); window._pt = setTimeout(() => renderCap(priorSpec()), 90); });
+$("cand").addEventListener("input", () => { clearTimeout(window._ct); window._ct = setTimeout(renderCandidate, 90); });
+$("conf").querySelectorAll("button").forEach(b => b.onclick = () => {
+  const next = +b.dataset.c/100;
+  if(next === CONF) return;
+  CONF = next;
+  $("conf").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("sweep-lvl").textContent = cPct();
+  saveState();
+  if(!surv) return;
+  surv = makeSurvey();                       // same field data, intervals at the new level
+  if(sweepRes) runSweep();
+  if(reps) runReplicates();
+  if(step === 1) renderStep2();
+  if(step === 4) enterBayes();
+});
+$("reset").onclick = newPopulation;
+$("unlock").onclick = () => { lockRail(false); setStep(0); };
+function newSite(){
+  const abc = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let s = ""; for(let i=0;i<3;i++) s += abc[Math.floor(Math.random()*abc.length)];
+  $("seed").value = s + "-" + (100 + Math.floor(Math.random()*900));
+  newPopulation();
+}
+$("newsite").onclick = newSite;
+$("seed").addEventListener("change", newPopulation);
+$("copycsv").onclick = async () => {
+  try { await navigator.clipboard.writeText($("csv").value); $("copycsv").textContent = "Copied"; setTimeout(() => $("copycsv").textContent = "Copy to clipboard", 1400); }
+  catch(e){ $("csv").select(); }
+};
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if(pop) drawField(); }, 120); });
+const mq = window.matchMedia("(prefers-color-scheme: dark)");
+mq.addEventListener("change", () => { if(pop) drawField(); });
+new MutationObserver(() => { if(pop) drawField(); }).observe(document.documentElement, { attributes:true, attributeFilter:["data-theme"] });
+
+/* ---------- keeping a session across a reload ---------- */
+const SKEY = "b342.session.v2";
+function saveState(){
+  if(!pop) return;
+  try {
+    localStorage.setItem(SKEY, JSON.stringify({
+      seed: pop.seed, cfg, survCfg, runIndex, guess, milestone, conf: cPct(), step
+    }));
+  } catch(e){}
+}
+function applyCfg(c){
+  $("method").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === c.method));
+  ["mr","quad","tran"].forEach(m => { $("g-"+m).classList.toggle("hidden", m !== c.method); $("asm-"+m).classList.toggle("hidden", m !== c.method); });
+  $("pattern").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === c.pattern));
+  cfg.method = c.method; cfg.pattern = c.pattern;
+  $("p1").value = c.p1; $("p2").value = c.p2; $("nq").value = c.nq;
+  $("qs").value = Math.max(0, QSIDES.indexOf(c.qs)); $("nt").value = c.nt; $("sig").value = c.sig;
+  $("a-het").checked = !!c.het; $("a-trap").checked = !!c.trap; $("a-mort").checked = !!c.mort;
+  $("a-imm").checked = !!c.imm; $("a-loss").checked = !!c.loss;
+  $("a-bias").checked = !!c.bias; $("a-nodetect").checked = !!c.naive;
+}
+function restoreState(){
+  let st = null;
+  try { st = JSON.parse(localStorage.getItem(SKEY) || "null"); } catch(e){}
+  if(!st || !st.survCfg || !st.runIndex || !st.seed) return false;
+  try {
+    if(st.conf && ZTAB[st.conf]){
+      CONF = st.conf/100;
+      $("conf").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.c === st.conf));
+      $("sweep-lvl").textContent = cPct();
+    }
+    $("seed").value = st.seed;
+    applyCfg(st.cfg); readControls();
+    pop = buildPopulation(st.seed, st.cfg.pattern);
+    survCfg = st.survCfg; runIndex = st.runIndex;
+    surv = makeSurvey();
+    guess = st.guess || null;
+    milestone = Object.assign({ swept:false, replicated:false }, st.milestone || {});
+    drawSpread(); renderStep1();
+    updateGates();
+    setStep(Math.min(st.step || 0, reach()));
+    $("restored").classList.remove("hidden");
+    $("restored").innerHTML = `<span>Session restored for site <b>${st.seed}</b>. Sections completed previously remain available.</span>` +
+      `<button class="btn" id="startfresh">Begin again</button>`;
+    $("startfresh").onclick = () => { try { localStorage.removeItem(SKEY); } catch(e){} $("restored").classList.add("hidden"); newSite(); };
+    return true;
+  } catch(e){ return false; }
+}
+function render(){ readControls(); drawSpread(); renderStep1(); if(step === 1) renderStep2(); }
+
+$("foot").innerHTML = `Prepared for <b>BIOL 342 · Ecology</b>, University of Massachusetts Boston. The study plot measures 120 × 80 m (9,600 m²). The true population size is determined by the study site code, so that each student works from a different population and results are reproducible on return to the same code.` +
+  ` Mark–recapture uses Chapman's (1951) estimator with Seber's (1970) variance. Quadrat counts are a simple random sample from a fixed grid, with the sample variance among quadrats and a finite-population correction. Line transects are systematic with a random start on a plot treated as wrapping in the x direction, with a half-normal detection function fitted by maximum likelihood (Buckland et al. 2001). The confidence belt of section 3 follows Neyman (1937); the nearest-neighbour statistic is that of Clark & Evans (1954) with Donnelly's (1978) edge correction.` +
+  ` Every figure on this page can be recomputed by hand from the raw data given in section 1.`;
+
+readControls();
+if(!restoreState()) newPopulation();
+</script>
+</body>
+</html>
