@@ -208,7 +208,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <div>
       <span class="eyebrow">BIOL 342 · Ecology · Measuring populations</span>
       <h1>Estimating abundance</h1>
-      <p class="lede">A 120 × 80 m plot contains a fixed but unknown number of animals, denoted N. No survey encounters all of them. The problem addressed here is to estimate N from a sample and to attach a defensible statement of uncertainty to that estimate.</p>
+      <p class="lede">A 1200 × 800 m plot contains a fixed but unknown number of an endangered oryx species, denoted <i>N</i>. Park managers would like to know how many oryxes there are, but it would be very difficult to count every animal in this space. Instead, we can count a certain fraction of them using different methods, and then try to estimate the total number from that sample. In addition to a number estimate, we want to provide park managers with a range, within which we are fairly confident that the true number of animals lies. The wider the range, the more confident we can be that the true value is within it, but an extremely wide range is not very useful. Conversely, narrower ranges are more precise but less likely to contain the true number.</p>
     </div>
     <div class="site">
       <label><span class="eyebrow">Study site code</span><input type="text" id="seed" value="BIOL342" spellcheck="false" autocomplete="off"></label>
@@ -242,45 +242,45 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     </div>
 
     <div class="group" id="g-mr">
-      <span class="eyebrow">Effort</span>
+      <span class="eyebrow">Survey effort</span>
       <div class="ctl"><div class="field-row"><label for="p1">Capture probability, session 1</label><span class="val" id="p1v">0.30</span></div><input type="range" id="p1" min="0.05" max="0.8" step="0.05" value="0.3"></div>
       <div class="ctl"><div class="field-row"><label for="p2">Capture probability, session 2</label><span class="val" id="p2v">0.30</span></div><input type="range" id="p2" min="0.05" max="0.8" step="0.05" value="0.3"></div>
     </div>
 
     <div class="group hidden" id="g-quad">
-      <span class="eyebrow">Effort</span>
+      <span class="eyebrow">Survey effort</span>
       <div class="ctl"><div class="field-row"><label for="nq">Number of quadrats</label><span class="val" id="nqv">20</span></div><input type="range" id="nq" min="4" max="80" step="1" value="20"></div>
       <div class="ctl"><div class="field-row"><label for="qs">Quadrat side</label><span class="val" id="qsv">10 m</span></div><input type="range" id="qs" min="0" max="3" step="1" value="2"></div>
     </div>
 
     <div class="group hidden" id="g-tran">
-      <span class="eyebrow">Effort</span>
+      <span class="eyebrow">Survey effort</span>
       <div class="ctl"><div class="field-row"><label for="nt">Number of transects</label><span class="val" id="ntv">4</span></div><input type="range" id="nt" min="2" max="10" step="1" value="4"></div>
       <div class="ctl"><div class="field-row"><label for="sig">Detectability (σ)</label><span class="val" id="sigv">7 m</span></div><input type="range" id="sig" min="3" max="15" step="1" value="7"></div>
     </div>
 
     <div class="group">
-      <span class="eyebrow">Spatial distribution</span>
+      <span class="eyebrow">Oryx spatial distribution</span>
       <div class="seg" id="pattern">
-        <button data-p="rand" aria-pressed="true">Random<small>Positions independent of one another</small></button>
-        <button data-p="clump" aria-pressed="false">Clumped<small>Aggregated, as most species are</small></button>
-        <button data-p="even" aria-pressed="false">Regular<small>Territorial spacing</small></button>
+        <button data-p="rand" aria-pressed="true">Random<small>Positions are independent of one another</small></button>
+        <button data-p="clump" aria-pressed="false">Clumped<small>Animals are aggregated together</small></button>
+        <button data-p="even" aria-pressed="false">Regular<small>Animals defend evenly-spaced territories</small></button>
       </div>
       <div class="spread">
-        <span class="eyebrow" style="display:block;margin:14px 0 6px">Nearest-neighbour distances</span>
+        <span class="eyebrow" style="display:block;margin:14px 0 6px">Oryx nearest-neighbour distances</span>
         <svg class="chart" id="nnchart" viewBox="0 0 262 78" role="img" aria-label="Distribution of nearest-neighbour distances among the animals"></svg>
         <p class="spread-cap" id="nncap"></p>
       </div>
     </div>
 
     <div class="group" id="g-assump">
-      <span class="eyebrow">Violate an assumption</span>
+      <span class="eyebrow">Violate a model assumption</span>
       <div id="asm-mr">
-        <label class="switch"><input type="checkbox" id="a-het"><span>Capture probability varies among individuals<small>Heterogeneity</small></span></label>
-        <label class="switch"><input type="checkbox" id="a-trap"><span>Marked animals become easier to catch<small>Behavioural response to trapping</small></span></label>
-        <label class="switch"><input type="checkbox" id="a-mort"><span>Marked animals die or emigrate<small>Losses between sessions</small></span></label>
-        <label class="switch"><input type="checkbox" id="a-imm"><span>Unmarked animals are recruited<small>Additions between sessions</small></span></label>
-        <label class="switch"><input type="checkbox" id="a-loss"><span>Tags are shed<small>Mark loss</small></span></label>
+        <label class="switch"><input type="checkbox" id="a-het"><span>Capture probability varies among individuals</span></label>
+        <label class="switch"><input type="checkbox" id="a-trap"><span>Marked animals become easier to catch</span></label>
+        <label class="switch"><input type="checkbox" id="a-mort"><span>Marked animals die or emigrate away</span></label>
+        <label class="switch"><input type="checkbox" id="a-imm"><span>Unmarked animals join the population</span></label>
+        <label class="switch"><input type="checkbox" id="a-loss"><span>Tags are occasionally shed</span></label>
       </div>
       <div id="asm-quad" class="hidden">
         <label class="switch"><input type="checkbox" id="a-bias"><span>Place quadrats where animals appear abundant<small>Non-random placement</small></span></label>
@@ -303,7 +303,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <div id="step0">
       <div class="card panel">
         <h2 id="s0h">The study plot</h2>
-        <p class="sub" id="s0sub">Select a survey method and run it. Animals that are never encountered leave no trace in the data; this is the central difficulty in estimating abundance, and every method below is a strategy for working around it.</p>
+        <p class="sub" id="s0sub">Decide on a survey method by selecting from the available options, as well as features of the oryx population, and run a survey. Animals that are never observed during the survey are invisible to the data -- this is the central difficulty in estimating abundance, and the following sections introduce methods to solve this.</p>
         <div class="fieldwrap" style="margin-top:15px"><canvas id="cv"></canvas>
           <div class="scalebar"><i></i>20 m</div>
         </div>
@@ -326,13 +326,13 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <div id="step1" class="hidden">
       <div class="card panel">
         <h2>The data in hand</h2>
-        <p class="sub">The following is the complete output of the field season. Record a point estimate and a plausible range for N, as would be reported in a paper, before revealing the true value.</p>
+        <p class="sub">The following is the complete output of the field season. Take a few minutes to make a guess of the population size and a range that you are confident includes the true value before we reveal the true value. How did you arrive at these numbers?</p>
         <div class="readout" id="obs"></div>
         <div class="guess">
-          <div class="g"><label class="eyebrow" for="gpt">Point estimate of N</label><input type="text" id="gpt" class="mono" inputmode="numeric" size="6"></div>
+          <div class="g"><label class="eyebrow" for="gpt">Your guess of the population size N</label><input type="text" id="gpt" class="mono" inputmode="numeric" size="6"></div>
           <div class="g"><label class="eyebrow" for="glo">Lower limit</label><input type="text" id="glo" class="mono" inputmode="numeric" size="6"></div>
           <div class="g"><label class="eyebrow" for="ghi">Upper limit</label><input type="text" id="ghi" class="mono" inputmode="numeric" size="6"></div>
-          <button class="btn primary" id="reveal">Reveal N</button>
+          <button class="btn primary" id="reveal">Reveal the true N</button>
         </div>
         <div id="revealbox" class="hidden">
           <div class="tally" id="rtally"></div>
@@ -345,8 +345,8 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <!-- STEP 3 -->
     <div id="step2" class="hidden">
       <div class="card panel">
-        <h2>Which values of N are consistent with the data?</h2>
-        <p class="sub">A point estimate from a single field season cannot be checked against anything. The question is therefore posed in reverse. Take a candidate value of N, simulate the same survey on a population of that size several hundred times, and ask how often a result as extreme as the observed one arises. Candidate values that would rarely produce the observed data are rejected; those that survive form an interval estimate.</p>
+        <h2>Which population sizes N are consistent with the data?</h2>
+        <p class="sub">A single point estimate cannot be checked against anything: we don't know the real population size, and we don't have access to other population sizes, so there is no ground truth to which we can compare. However, we can use our powers of simulation to generate (simulated) data to get some insight into this question. In this procedure, we assume a certain population size N, then we simulate our survey many times on a population of that size and ask how often our observed result would arise. Candidate population sizes that are unlikely to produce our observed data are rejected, while those that plausibly could generate our observed data are included in our confidence interval. Of course, this process depends on whether our model assumptions match what is really happening in the real world; if they don't, then our results won't be accurate.<br><br>Below, vary the candidate population size and study the distribution of results that it produces. In particular, look at whether our actual observed data (black vertical line) does or does not fall within the bulk of the distribution.</p>
         <div class="ctl" style="margin-top:18px">
           <div class="field-row"><label for="cand">Candidate population size</label><span class="val" id="candv">—</span></div>
           <input type="range" id="cand" min="0" max="100" step="1" value="50">
@@ -357,7 +357,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
       </div>
       <div class="card panel">
         <h2>The confidence belt</h2>
-        <p class="sub">Testing candidates one at a time is laborious, so the procedure is applied across the whole range at once. For each candidate value of N, 400 surveys are simulated and the central <span id="sweep-lvl">95</span>% of the resulting statistics is recorded. The set of candidates whose band contains the observed value constitutes the interval estimate. The construction is due to Neyman (1937) and is known as a confidence belt.</p>
+        <p class="sub">Testing candidates one at a time is laborious, so the procedure is applied across the whole range at once. For each candidate value of N, 400 surveys are simulated and the central <span id="sweep-lvl">95</span>% of the resulting observations is recorded. The set of candidates whose distribution contains the observed value constitutes our estimate of the confidence interval.</p>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px">
           <button class="btn primary" id="sweep">Evaluate 28 candidate values of N</button>
           <span class="pill" id="sweepstate">not yet run</span>
@@ -370,7 +370,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
       </div>
       <div class="card panel hidden" id="c-formula">
         <h2>The closed-form estimator</h2>
-        <p class="sub">Published abundance estimates are not obtained by simulation. Standard estimators give the same answer in closed form, and having constructed the interval by enumeration it is now possible to see what those formulae approximate.</p>
+        <p class="sub">Published abundance estimates are usually not obtained by simulation. Instead, they're usually calculated directly through specific equations. We calculate these here and compare them to the results that we got through simulations above. We used simulations above, though, because they are useful in providing us with intuition of what's happening when constructing confidence intervals that mathematical equations sometimes can't do.</p>
         <div class="tally" id="formula"></div>
         <div class="note" id="formulanote"></div>
         <div class="detbox hidden" id="c-detfit">
@@ -385,15 +385,15 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <div id="step3" class="hidden">
       <div class="card panel">
         <h2>The sampling distribution of the estimator</h2>
-        <p class="sub">The same population, the same field design, run again and again. Everything that changes between runs is chance — and chance is what a confidence interval is trying to describe. The design controls are fixed here so that every panel refers to the same set of field data. Section 3 produced a single interval and asked whether it contains the true value. This section asks the question that can actually be answered: how often would a procedure of that kind do so?</p>
+        <p class="sub">Here we consider what would happen if we ran the same experiment (with the same population and the same sampling method) many times. Our results would change somewhat each time, even though the underlying system remains the same. This is because there is inherent noise when we sample a portion of the population and extrapolate from that to estimate something about the whole population. Most of the time, our sample will contain a 'typical' set of individuals, but sometimes we might get unlucky and capture an unusually low number of individuals, for example. In this section, we'll look more closely at how random sampling noise can affect our conclusions about the size of the population.</p>
         <div class="conflevel">
           <span class="eyebrow">Confidence level</span>
           <div class="seg seg-row" id="conf">
-            <button data-c="90" aria-pressed="false">90%<small>Narrower; fails more often</small></button>
+            <button data-c="90" aria-pressed="false">90%<small>Narrower; fails to contain the true value more often</small></button>
             <button data-c="95" aria-pressed="true">95%<small>Conventional</small></button>
-            <button data-c="99" aria-pressed="false">99%<small>Wider; fails less often</small></button>
+            <button data-c="99" aria-pressed="false">99%<small>Wider; fails to contain the true value less often</small></button>
           </div>
-          <p class="chart-sub" style="margin:9px 0 0">The conventional level of 95% has no special status. It fixes the tolerated rate of failure and therefore the width of the interval, and the setting chosen here applies throughout: to the belt in section 3 and to the credible interval in section 5 as well as to the coverage measured below.</p>
+          <p class="chart-sub" style="margin:9px 0 0">There's no special reason why scientists have decided to calculate 95% confidence intervals (rather than some other probability, lik 95% or 99%). Similarly, there's no special reason that our threshold for significance when doing statistical tests is p = 0.05. These are just arbitrary conventions that we scientists have somehow agreed on. But this choice determines how often we are wrong about our conclusions (i.e., the true value falling within the confidence interval, or determining significance correctly), and represents a trade-off between drawing correct conclusions and the effort needed. If we set our threshold for statistical significance to 0.00001, for example, then statistically significant results would almost certainly be true, but it would take an incredible amount of effort to achieve these results. Physics sometimes has very stringent requirements for significance but also invests a lot in their experiments.<br><br>Now, we'll generate data from 500 different replicates of our study and look at the overall distribution of population estimates and confidence intervals.</p>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px">
           <button class="btn primary" id="rep">Draw 500 replicate surveys</button>
@@ -421,7 +421,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
     <div id="step4" class="hidden">
       <div class="card panel">
         <h2>Inverse probability</h2>
-        <p class="sub">Sections 3 and 4 both evaluate P(data | N): the probability of obtaining particular data if the population were of a given size. This is the direction in which a simulation runs, since a population must be specified before a survey can be drawn from it. The quantity of practical interest is the reverse, P(N | data), and it cannot be obtained without one additional input.</p>
+        <p class="sub">Sections 3 and 4 both evaluated the probability of observing a particular set of data, assuming that the population was a particular size. This can be written as: P(data | N) (the probability of observing the data given the actual population size). However, this isn't actually what we as ecologists want to know. A more intuitive question to ask is: what is the probability that the actual population is a certain size, given the data that we observed. This can be written as: P(N | data). Take a few minutes to digest this! Is it clear to you how these two formulations are different? Is one a more natural scientific question to ask than the other?</p>
         <div class="note" id="bayesintro"></div>
         <span class="eyebrow" style="display:block;margin:20px 0 9px">Prior information</span>
         <div class="seg seg-row" id="prior"></div>
@@ -429,8 +429,8 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
         <p class="chart-sub" id="countcap"></p>
         <div class="tblscroll"><table class="data" id="counttab"></table></div>
         <div class="note">
-          The operation carried out in that table — multiplying the number imagined by the proportion that produced the observed result, then dividing by the total — is <b>Bayes' rule</b>, also called Bayes' theorem. It was set out by Thomas Bayes in a paper published in 1763 and developed independently by Laplace shortly afterwards. No part of the remainder of this section is more difficult than the arithmetic in those five rows.
-          <br><br>Each column has a conventional name. The first is the <b>prior</b>, the distribution of belief about N held before the data were collected. The second is the <b>likelihood</b>, the probability of the observed data under each candidate value of N. The third is the <b>posterior</b>, the distribution of belief after the data have been taken into account. Sections 3 and 4 used the likelihood alone; that is why neither could assign a probability to any particular value of N.
+          The operation carried out in the above table — multiplying the number of hypothetical plots by the proportion that produced the observed result, then dividing by the total — is <b>Bayes' rule</b>, also called Bayes' theorem. It was set out by Thomas Bayes in a paper published in 1763 and developed independently by Laplace shortly afterwards.
+          <br><br>The quantity shown in each column has a name in the world of Bayesian statistics. The first ("Hypothetical plots") is the <b>prior</b>, or the distribution of belief about N held before the data were collected. The second ("How many plots produced the observed result") is the <b>likelihood</b>, the probability of the observed data under each candidate value of N. The third ("Share of survivors") is the <b>posterior</b>, the distribution of belief after the new data have been measured.
         </div>
         <div class="tally" id="posttally" style="margin-top:20px"></div>
         <svg class="chart" id="post" viewBox="0 0 760 300" role="img" aria-label="Prior, likelihood and posterior over the population size"></svg>
@@ -451,7 +451,7 @@ footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--rule); font
       </div>
       <div class="card panel">
         <h2>Sensitivity to the prior</h2>
-        <p class="sub">Since a prior must contribute something to the result, the relevant question is how much. The control below sets the largest population size the prior admits as possible; the effect of varying it depends on how much information the data themselves carry.</p>
+        <p class="sub">Since a prior must contribute something to the result, the relevant question is how much. The slider below sets the largest population size the prior admits as possible; the effect of varying it depends on how much information the data themselves carry. Here we compare both our observed survey (green) as well as a hypothetical "sparse" one where we had only 1 recapture (orange).</p>
         <div class="ctl" style="margin-top:16px">
           <div class="field-row"><label for="cap">Upper bound admitted by the prior</label><span class="val" id="capv">—</span></div>
           <input type="range" id="cap" min="0" max="100" step="1" value="30">
@@ -957,9 +957,9 @@ function renderStep1(){
             tile("Of these, already marked", fmt(d.m2), "m\u2082", d.m2 < 5 ? "warn" : "") +
             tile("Marked fraction of the catch", d.n2 ? pct(d.m2/d.n2) : "\u2014", "m\u2082 / n\u2082", "hi");
     note = `In the first session ${d.n1} animals were captured, marked and released. In the second, ${d.n2} were captured, of which ${d.m2} carried a mark; the marked fraction of the second sample is therefore ${pct(d.m2/Math.max(d.n2,1))}. ` +
-      `These four numbers are the entire result of the field season. None of them is an estimate of N.` +
+      `These four numbers are the entire result of the field season, but none of them is an estimate of N.` +
       (d.m2 < 5 ? `<br><br>Note that only ${d.m2} marked animals were recaptured. Any estimate derived from this sample will rest on that small number, and will be correspondingly imprecise. Low recapture rates are the most common source of failure in field applications of this method.` : "") +
-      `<br><br>Before proceeding, vary the capture probabilities and observe which of the four counts respond. The switches on the left violate one assumption of the method at a time; running the survey again after each shows the effect on the raw counts. Section 2 poses the question these counts are meant to answer: given that ${pct(d.m2/Math.max(d.n2,1))} of the second sample was already marked, how large is the population?`;
+      `<br><br>Before proceeding, vary the capture probabilities and observe which of the four counts vary in response. In addition, the buttons in the left menu allow you to violate different assumptions of the method; running the survey again after clicking on a button shows the effect of that assumption on the raw counts. <br><br>After exploring the simulation for a little while, move on to Section 2 ("A first estimate") by clicking the tab near the top of the page. This next section asks you to give an initial answer based on your current knowledge and intuition: given that ${pct(d.m2/Math.max(d.n2,1))} of the second sample was already marked, how large do you think the total population is? For this exercise, I would recommend that you stick with the mark-recapture method, but feel free to explore the other sampling methods.`;
     csv = "session,tag_id,x_m,y_m\n";
     for(let i=0;i<pop.N;i++) if(d.caught1[i]) csv += `1,T${String(i).padStart(4,"0")},${pop.pts[i].x.toFixed(1)},${pop.pts[i].y.toFixed(1)}\n`;
     for(let i=0;i<pop.N;i++) if(d.caught2[i]) csv += `2,${d.marked[i]?"T"+String(i).padStart(4,"0"):"untagged"},${pop.pts[i].x.toFixed(1)},${pop.pts[i].y.toFixed(1)}\n`;
@@ -974,7 +974,7 @@ function renderStep1(){
       `The variance among quadrats is ${d.v.toFixed(2)}, giving a variance-to-mean ratio of ${disp.toFixed(2)}. ` +
       (disp > 1.6 ? `A ratio appreciably above 1 indicates aggregation: some quadrats fall within a patch and others between patches. Under a Poisson distribution, which would arise if individuals were positioned independently, the ratio is 1.`
                   : `A ratio near 1 is consistent with a Poisson distribution, which arises when individuals are positioned independently of one another.`) +
-      `<br><br>Before proceeding, vary the number and size of the quadrats and observe the effect on both quantities. Section 2 poses the question these counts are meant to answer: given ${tot} animals in ${pct(d.frac)} of the plot, how large is the population?`;
+      `<br><br>Before proceeding, vary the number and size of the quadrats and observe the effect on both quantities. br><br>After exploring the simulation for a little while, move on to Section 2 ("A first estimate") by clicking the tab near the top of the page. This next section asks you to give an initial answer based on your current knowledge and intuition: given ${tot} animals in ${pct(d.frac)} of the plot, how large do you think the total population is? For this exercise, I would recommend that you stick with the mark-recapture method, but feel free to explore the other sampling methods.`;
     csv = "quadrat_id,x_min_m,y_min_m,side_m,count\n";
     d.boxes.forEach((b,i) => csv += `${i+1},${b.x.toFixed(1)},${b.y.toFixed(1)},${b.s},${b.c}\n`);
   } else {
@@ -1027,12 +1027,12 @@ function renderReveal(){
          covered ? "contains N" : "excludes N", covered ? "" : "warn") +
     tile("Width of the interval", width !== null ? (width*100).toFixed(0) + "%" : "\u2014", "of true N");
   $("rnote").innerHTML =
-    `The estimate is ${Math.abs(err*100).toFixed(1)}% ${err >= 0 ? "above" : "below"} the true value of ${pop.N}. ` +
+    `Your estimate is ${Math.abs(err*100).toFixed(1)}% ${err >= 0 ? "above" : "below"} the true value of ${pop.N}. ` +
     (Math.abs(err) < 0.1 ? "This is a reasonable reading of the data. " : "") +
-    `Arriving at a point estimate is the more straightforward half of the problem. The interval is the harder half, and the one just recorded was chosen by judgement rather than derived from anything. ` +
-    (covered ? "It contains the true value on this occasion, but there is no way to distinguish a well-judged interval from a fortunate one on the evidence of a single trial."
-             : "It does not contain the true value. Intervals set by judgement are characteristically too narrow: a narrow interval conveys precision, and the impression of precision is not corrected by the data.") +
-    `<br><br>The animals that were present but not encountered are now shown in section 1, in grey behind those that were.<br><br>Section 3 derives an interval by an explicit procedure, by determining which population sizes could plausibly have produced the observed data.`;
+    `Arriving at a guess of the population size (i.e., a point estimate) is the more straightforward part of the problem. Determining an interval in which you're confident contains the true value is the harder part, and the one that you recorded was presumably chosen by intuition rather than from a mathematical calculation ` +
+    (covered ? "Your range does contain the true value on this occasion, which means that you have great intuition! But is there a way to be more mathematically rigorous when determining this range?"
+             : "Your range does not contain the true value. That's okay because it takes time to develop intuition with a new system of study. But is there a way to be more mathematically rigorous (and accurate) when determining this range?") +
+    `<br><br>Now let's move on to Section 3 ("Interval estimation") by clicking the tab near the top of the page. This next section shows graphically how we can rigorously calculate a confidence interval (by determining which population sizes could plausibly have produced the observed data).`;
 }
 $("reveal").onclick = () => {
   if(!surv) return;
@@ -1100,13 +1100,13 @@ function runReplicates(){
     tile("Standard deviation", "±" + fmt(s.sd), "CV " + (s.cv*100).toFixed(1) + "%") +
     tile("Coverage", (s.cov*100).toFixed(1) + "%", "nominal " + cPct() + "%", under?"warn":"");
   const act = ACTIVE();
-  let txt = `Over ${s.n} replicate surveys of the same population the estimator averaged <b>${fmt(s.mean,1)}</b> against a true value of <b>${pop.N}</b>, a discrepancy of ${(s.relBias>=0?"+":"")}${(s.relBias*100).toFixed(1)}%. Individual estimates ranged from ${fmt(s.sorted[0])} to ${fmt(s.sorted[s.sorted.length-1])}. `;
+  let txt = `Over ${s.n} replicate surveys, the estimator averaged a population size of <b>${fmt(s.mean,1)}</b> oryxes against a true value of <b>${pop.N}</b> oryxes, a discrepancy of ${(s.relBias>=0?"+":"")}${(s.relBias*100).toFixed(1)}%. The accuracy of this estimate makes sense because the data from 500 surveys are combined to form this estimate. On the other hand, individual estimates ranged from ${fmt(s.sorted[0])} to ${fmt(s.sorted[s.sorted.length-1])} oryxes. `;
   if(survCfg.method === "mr" && s.altMean !== null)
-    txt += `<br><br>The uncorrected Lincoln–Petersen ratio n₁n₂/m₂ averaged ${fmt(s.altMean,1)} over the same replicates, against ${fmt(s.mean,1)} for Chapman's corrected form. The uncorrected ratio is biased upwards whenever recaptures are few, since m₂ appears in the denominator and cannot fall below one without the ratio becoming undefined. The choice of estimator is a substantive one, and the two are not interchangeable.`;
+    txt += `<br><br>A side note about the calculation of the estimate: the uncorrected Lincoln–Petersen ratio n₁n₂/m₂ averaged ${fmt(s.altMean,1)} over the same replicates, against ${fmt(s.mean,1)} for Chapman's corrected form. The uncorrected ratio is biased upwards whenever there are few recaptures, since m₂ appears in the denominator of the equation and cannot fall below 1 without the ratio becoming undefined. The choice of estimator is a substantive one, and the two are not interchangeable.`;
   if(act.length) txt += `<br><br>An assumption of the method has been violated: ` + act.map(k => REASONS[k]).join(" ");
-  if(under) txt += `<br><br>The intervals attain a coverage of ${(s.cov*100).toFixed(1)}% against a nominal ${cPct()}%. A confidence interval describes only sampling variability, that is, the consequences of which individuals happened to be captured. It carries no information about whether the estimator is aimed at the correct quantity, so a violated assumption produces intervals that are narrow and wrong rather than appropriately wide.`;
+  if(under) txt += `<br><br>The confidence intervals attain a coverage of ${(s.cov*100).toFixed(1)}% against a nominal ${cPct()}%. A confidence interval describes only sampling variability, that is, the consequences of which individuals happened to be captured. It carries no information about whether the estimator is aimed at the correct quantity, so a violated assumption produces intervals that are narrow and wrong rather than appropriately wide.`;
   else if(s.cov > Math.min(0.995, CONF + 0.035)) txt += `<br><br>Coverage is ${(s.cov*100).toFixed(1)}% against a nominal ${cPct()}%, so the intervals are conservative. The variance estimator assumes ${survCfg.method === "tran" ? "that the transects were positioned at random, whereas they were in fact systematically spaced" : "simple random sampling"}; a systematic arrangement is more efficient than the formula credits, and the resulting interval is wider than necessary. Conservative intervals are the safer error, but they reduce the power to detect real change.`;
-  else if(!act.length) txt += `<br><br>The intervals contain the true value on ${(s.cov*100).toFixed(1)}% of occasions, which is the meaning of the ${cPct()}% level: it is a property of the procedure over repeated application, not of any single interval obtained from it.`;
+  else if(!act.length) txt += `<br><br>Of the ${s.n} confidence intervals, <b>${(s.cov*100).toFixed(1)}%</b> of them contained the true number of oryxes. This number should be close to 95%, which makes sense, because this is what it means to calculate a ${cPct()}% confidence interval. Assuming that the model assumptions hold true, in 95% of replicates, the true value will be contained in the 95% confidence interval.`;
   $("repnote").innerHTML = txt;
   $("repnote").className = "note" + ((off||under) ? " alert" : "");
   drawHist(s); drawCoverage(a, s);
@@ -1162,7 +1162,7 @@ function drawHist(s){
   $("hist").innerHTML = g + bars + marks + axisLine(L, T+ph, L+pw, T+ph) + ticks +
     txt(L+pw/2, Ht-4, "estimated population size", {fill:"var(--ink-3)", size:10.5}) +
     txt(L-34, T-16, "surveys", {anchor:"start", fill:"var(--ink-3)", size:10.5});
-  $("hist-sub").textContent = `All ${s.n} replicates applied the same design to the same population, and no error occurred in any of them. The estimates nevertheless differ, and the full width of this histogram represents the range of results that a single field season could have returned in place of the one obtained.` + (out ? ` ${out} extreme estimates fall beyond the axis.` : "");
+  $("hist-sub").textContent = `Shown below is the distribution of the ${s.n} estimates of the population size. The estimates cluster together but nonetheless differ somewhat due to random sampling noise. The width of this distribution represents the range of results that the study could have reasonably produced in an alternate universe, instead of the one that we actually measured.`
 }
 
 function drawCoverage(a, s){
@@ -1197,7 +1197,7 @@ function drawCoverage(a, s){
     [0,0.25,0.5,0.75,1].map(f => txt(L+f*pw, T+ph+22, Math.round(lo+f*(hi-lo)), {fill:"var(--ink-3)"})).join("") +
     txt(L+pw/2, Ht-2, "estimated population size", {fill:"var(--ink-3)", size:10.5});
   $("cov-title").textContent = `What "${cPct()}% confident" actually means`;
-  $("cov-sub").innerHTML = `Forty-five of the ${a.length} replicates are shown, each as its own ${cPct()}% interval, ordered by estimate. <b>${miss} of the 45 exclude</b> the true value; across all ${a.length} replicates, ${(s.cov*100).toFixed(1)}% contain it. The true value is fixed throughout; it is the intervals that vary. This is what the ${cPct()}% level asserts: a statement about the long-run behaviour of the procedure, and not about any one interval in hand.`;
+  $("cov-sub").innerHTML = `Below, 45 of the ${a.length} replicates are shown, with the point estimate and the ${cPct()}% confidence interval of each replicate shown. They are ordered from the smallest (top) to the largest (bottom) point estimate. Of these replicates, <b>${miss} of the 45</b> confidence intervals <b>do not include</b> the true value. As noted above, across all ${a.length} replicates, ${(s.cov*100).toFixed(1)}% of the confidence intervals successfully contain the true value.</br></br>Lastly, let's go to Section 5 ("Bayesian inference") by clicking the tab near the top of the page. We'll look at a different way of understanding statistics, which is rarely taught in more introductory science classes but in some ways is more intuitive than the traditional 'frequentist' statistics that we are typically taught.`;
 }
 
 
@@ -1346,8 +1346,8 @@ function renderCandidate(){
     tile("Decision", ruled ? "rejected" : "retained", ruled ? "" : "consistent with the data", ruled ? "warn" : "");
   drawCandidate(v, obs, Nc, qlo, qhi);
   $("candnote").innerHTML = ruled
-    ? `If the population contained ${fmt(Nc)} animals, a survey conducted in the same way would produce ${fmt(obs)} ${STAT[m].short} on approximately ${(p*100).toFixed(1)}% of occasions. At the ${cPct()}% level this is sufficiently improbable for the candidate to be rejected: the observed data are difficult to reconcile with a population of that size.`
-    : `If the population contained ${fmt(Nc)} animals, a result such as the one obtained would be unremarkable, occurring on approximately ${(p*100).toFixed(0)}% of occasions. The data provide no grounds for rejecting this candidate, which is therefore retained.<br><br>Note the form of the question. It is not how probable ${fmt(Nc)} is, which the data alone cannot establish, but whether ${fmt(Nc)} could plausibly have generated the observations. Adjust the candidate value until the decision reverses, in both directions, to locate the limits of the interval.`;
+    ? `If the population contained ${fmt(Nc)} animals, our survey method would produce ${fmt(obs)} ${STAT[m].short} on approximately ${(p*100).toFixed(1)}% of occasions. At the ${cPct()}% level this is sufficiently improbable for this candidate population size to be rejected: the observed data is unlikely to be produced by a population of that size.`
+    : `If the population contained ${fmt(Nc)} animals, a result such as the one that we observed would be unremarkable, occurring on approximately ${(p*100).toFixed(0)}% of occasions. The data provide no grounds for rejecting this candidate and is therefore retained.<br><br>Be careful to note the form of the question (and the answer). We are not asking how likely is it that the population size is ${fmt(Nc)}. Instead, we're asking the opposite question: could a population size of ${fmt(Nc)} have plausibly generated our observations. Make sure you understand the difference between these two questions! <br><br>Adjust the candidate values until you locate both the lower and upper limits of the interval.`;
 }
 function drawCandidate(v, obs, Nc, qlo, qhi){
   const Wd = 760, Ht = 234, L = 46, R = 16, T = 54, B = 42, pw = Wd-L-R, ph = Ht-T-B;
@@ -1449,7 +1449,7 @@ function drawBelt(){
     if(guess.g >= lo && guess.g <= hi)
       brackets += `<circle cx="${X(guess.g)}" cy="${by}" r="3.5" fill="var(--s2)"/>`;
     const gx = clamp(X(clamp(guess.lo !== null ? guess.lo : guess.g, lo, hi)), L, Wd-232);
-    brackets += txt(gx, by+16, "estimate recorded in section 2", {anchor:"start", fill:"var(--s2)"});
+    brackets += txt(gx, by+16, "your estimate recorded in section 2", {anchor:"start", fill:"var(--s2)"});
   }
   $("belt").innerHTML = g + ribbon + hits + marks + brackets +
     `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="var(--rule)"/>` +
@@ -1459,10 +1459,10 @@ function drawBelt(){
     txt(L+pw/2, Ht-2, "candidate population size", {fill:"var(--ink-3)", size:10.5});
   const act = ACTIVE();
   $("beltnote").innerHTML =
-    `The band gives the central ${cPct()}% of results that each candidate population would generate; the horizontal line marks the value actually observed. A candidate is retained wherever the line falls inside the band. ` +
+    `The light green band gives the central ${cPct()}% of results that each candidate population size would generate; the horizontal black line marks the value actually we actually observed in our survey. A candidate is retained wherever the line falls inside the band. ` +
     (nLo !== null && nHi !== null
-      ? `The retained values run from ${fmt(nLo)} to ${fmt(nHi)}, and this range constitutes a ${cPct()}% confidence interval for N. It has been obtained without recourse to any formula, by determining which values of N are compatible with the evidence.`
-        + (pop.N >= nLo && pop.N <= nHi ? ` On this occasion it contains the true value of ${pop.N}.` : ` It does not contain the true value of ${pop.N}. Approximately ${(100-cPct())} intervals in every hundred are expected to fail in this way; section 4 establishes whether this design fails at about that rate.`)
+      ? `The retained values run from ${fmt(nLo)} to ${fmt(nHi)}, and this range constitutes our ${cPct()}% confidence interval for N. <br><br>Note that we only used simulated data to generate this confidence interval. This process is subject to some error because our results are noisy and depends on how many replicates we run (for example, note how 'lumpy' some of the histograms look above). In addition, this process can be computationally expensive and take a long time to run (depending on how fast your computer is) because we have to run many thousands of simulations before we can construct a confidence interval. As we'll see below, we can use equations to directly calculate these values.<br><br>`
+        + (pop.N >= nLo && pop.N <= nHi ? ` On this occasion it contains the true value of ${pop.N}, which is great!` : ` It does not contain the true value of ${pop.N}. Approximately ${(100-cPct())} intervals in every hundred are expected to fail in this way; section 4 looks at this in more detail.`)
       : `The data are compatible with every candidate tested, and the interval is unbounded within the range examined.`) +
     (act.length ? `<br><br>The construction assumes that the survey conformed to the model. Each simulated survey above was generated under the textbook assumptions of the method, and cannot detect that ${act.map(k => REASONS[k].charAt(0).toLowerCase() + REASONS[k].slice(1)).join(" ")} An interval is only as reliable as the model from which it is derived.` : "") +
     (m === "tran" ? `<br><br>The detection function has also been treated as known. The closed-form interval below additionally accounts for the fact that it was estimated from the same data, and is correspondingly wider.` : "");
@@ -1483,13 +1483,13 @@ function renderFormula(){
   $("formula").innerHTML =
     tile("Point estimate", fmt(e.Nhat), f.short, "hi") +
     tile("Interval, closed form", fmt(Math.max(0,e.lo)) + "–" + fmt(e.hi), cPct() + "%") +
-    tile("Interval, by inversion", both ? fmt(nLo) + "–" + fmt(nHi) : "—", "section 3") +
+    tile("Interval, from simulations", both ? fmt(nLo) + "–" + fmt(nHi) : "—", "section 3") +
     tile("True population", fmt(pop.N), "", "");
   $("formulanote").innerHTML =
     `<b>${f.name}.</b> <span class="mono">${f.expr}</span>. ${f.why}` +
-    (both ? `<br><br>The closed-form interval and the interval constructed by inversion ${overlap > 0.7 ? "are in close agreement" : "differ appreciably"}. This is to be expected: the formula is not an alternative principle but an algebraic approximation to the construction carried out above, derived so that the simulation need not be run.` +
-      `<br><br>Where the two differ, the reason is worth identifying. The width of the closed-form interval derives from the variability measured within this one sample, whereas the construction uses the variability that the model predicts for each candidate value of N. ` +
-      (m === "mr" ? `The closed-form interval is also symmetric about the estimate, while the sampling distribution of N̂ is right-skewed; the constructed interval therefore extends further above the estimate than below it.`
+    (both ? `<br><br>The interval that we calculated directly and the interval constructed through simulations ${overlap > 0.7 ? "are in close agreement" : "differ appreciably"}. This is to be expected: the formula operates on the same principles as our simulations and is an algebraic approximation to the simulation results. But because it can be calculated directly, it is a lot faster to run compared to the many thousands of simulations that we ran.` +
+      `<br><br>When the two estimates differ, it's worth identifying the reason. The width of the closed-form interval is derived from the variability measured in our one observed sample, whereas the interval that we constructed from simulations uses the variability that the model predicts for each candidate value of N. ` +
+      (m === "mr" ? `The closed-form interval is also assumed to be symmetric around the estimate, while the sampling distribution of N̂ is right-skewed; the constructed interval therefore extends further above the estimate than below it. <br><br>Now let's go to Section 4 ("Repeated sampling") by clicking the tab near the top of the page. While a confidence interval usually includes the true value, sometimes it fails to do so, purely due to bad luck. We'll look more at this in the next section.`
        : survCfg.pattern === "clump" ? `The population is aggregated, and the construction additionally allows for uncertainty about the arrangement of individuals as well as their number, which makes it the more conservative of the two.`
        : `The two converge as sample size increases; in small samples they may differ appreciably.`) : "");
   $("c-detfit").classList.toggle("hidden", m !== "tran");
@@ -1599,8 +1599,8 @@ function enterBayes(){
   const spec = priorSpec();
   $("prior").innerHTML =
     `<button data-k="flat" aria-pressed="${priorKind==="flat"}">Uniform<small>All population sizes equally probable</small></button>` +
-    `<button data-k="last" aria-pressed="${priorKind==="last"}">Previous survey<small>${fmt(spec.lastYear)} ± ${fmt(spec.lastSd)}, one year earlier</small></button>` +
-    `<button data-k="cap" aria-pressed="${priorKind==="cap"}">Territory capacity<small>${spec.terr} m² per territory, hence N ≤ ${fmt(spec.capacity)}</small></button>`;
+    `<button data-k="last" aria-pressed="${priorKind==="last"}">Previous surveys<small>Prior based on the results of previous surveys</small></button>` +
+    `<button data-k="cap" aria-pressed="${priorKind==="cap"}">Territory capacity<small>Oryxes occupy ${spec.terr} m² per territory, which puts an upper limit N ≤ ${fmt(spec.capacity)} on the population size</small></button>`;
   $("prior").querySelectorAll("button").forEach(b => b.onclick = () => { priorKind = b.dataset.k; enterBayes(); });
   meagre = meagreSurvey();
   renderCounting(likParams(surv.data, survCfg), spec);
@@ -1637,10 +1637,10 @@ function renderCounting(L, spec){
   $("countcap").innerHTML = `Five candidate population sizes are considered. ` +
     (priorKind === "flat"
       ? `Under a uniform prior, ${fmt(imagined)} plots are imagined at each size.`
-      : `Plots are imagined in proportion to the prior: ${fmt(imagined)} at the size the prior favours most, and fewer at sizes it considers less probable.`) +
+      : `Plots are imagined in proportion to a particular prior belief about what population sizes are likely: ${fmt(imagined)} at the size the prior favors most, and fewer at sizes it considers less probable.`) +
     ` Each is surveyed, and every plot failing to reproduce ${unit} is discarded. The survivors are then counted.`;
   $("counttab").innerHTML =
-    `<tr><th>Population size</th><th>Plots imagined</th><th>Of these, number giving the observed result</th><th>Share of survivors</th></tr>` +
+    `<tr><th>Population size</th><th>Hypothetical plots</th><th>How many plots produced the observed result</th><th>Share of survivors</th></tr>` +
     rows.map(r => `<tr><td>${fmt(r.N)} animals</td><td>${fmt(r.started)}</td><td>${r.started === 0 ? "—" : fmt(r.lived)}</td>` +
       `<td class="hi-col">${tot ? (r.lived/tot*100).toFixed(1) + "%" : "—"}</td></tr>`).join("") +
     `<tr><td><b>total</b></td><td>${fmt(rows.reduce((a,b)=>a+b.started,0))}</td><td><b>${fmt(tot)}</b></td><td class="hi-col"><b>100%</b></td></tr>`;
@@ -1651,9 +1651,8 @@ function renderBayes(spec){
   const flat = posterior(L, "flat", spec, cap);
   const ci = ciNow();
   $("bayesintro").innerHTML =
-    `The procedure of section 3 answered a question admitting only two outcomes. For each candidate value of N it asked whether that value could have produced the observed data, rejected those that could not, and treated all the remainder alike. This discards information. Some retained values generate a result like the observed one routinely; others do so only rarely, and were retained merely because "rarely" is not "never". The former have stronger support than the latter, and a satisfactory method should reflect that.` +
-    `<br><br>Weighting the candidates requires a count, and a count requires a starting stock. Consider a thousand hypothetical plots containing 400 animals, a thousand containing 550, a thousand containing 700, and so on. Survey every one of them, and discard every plot whose survey did not reproduce the observed result. The distribution of population sizes among the plots that remain is the quantity sought: the probability of each value of N given the data.` +
-    `<br><br>The difficulty lies in the first step. The number of plots assumed at each size is not determined by the data. A thousand of each embodies the assumption that all sizes were equally probable beforehand; two thousand near 450 and very few above 700 embodies a different assumption and yields a different result. The choice cannot be avoided, since the surviving stock cannot be assembled without deciding what was placed in it. That assumption is termed the <b>prior</b>, and it is the one component the data cannot supply.`;
+    `One issue with the procedure described in Section 3 is that it reduced the rich data contained in a simulation into a reduced yes-no data point. Specifically, it either rejected or failed to reject the observed data as a plausible outcome of an assumed actual population size. This throws away a lot of potentially useful data. If you go back to Section 3 and play with different candidate population sizes, you'll see the observed data more in the bulk of the distribution, or more in the tails, which intuitively should tell us something about how likely the data is to be observed. A simple yes-no decision doesn't capture that subtlety. <br><br>In addition, the final result is a confidence interval, which just says that the true value is likely to be somewhere in the interval and unlikely to be outside of the interval, but it doesn't give information about the relative likelihood of the true value being in different places along the interval.` +
+    `<br><br>An arguably better approach is to imagine a lot of hypothetical populations, sampling each one, and keeping only the ones where the sample estimate exactly matched our actual data. Then, the distribution of sizes in our remaining populations gives us the P(N | data) that we're looking for. However, to do this, we need to first construct our set of hypothetical populations. Should we have 100 populations each of size 100, 101, 102, and so on through 800? Or should we have 200 populations of size 100, 300 of size 101, 350 of size 102, etc? The data doesn't give us any information about what the right thing to do here is. Instead, this choice reflects our <b>prior</b> belief about what the likely distribution of real population sizes are. This is a choice that we as scientists must make in Bayesian statistics (which is what this is) that you don't have to make in frequentist statistics (which we used in Sections 3 and 4).`;
   const shift = (post.q.med - flat.q.med)/Math.max(flat.q.med,1);
   $("posttally").innerHTML =
     tile("True population", fmt(pop.N), "", "") +
@@ -1664,11 +1663,11 @@ function renderBayes(spec){
   const covB = pop.N >= post.q.lo && pop.N <= post.q.hi, covF = pop.N >= ci.lo && pop.N <= ci.hi;
   $("postnote").innerHTML =
     (priorKind === "flat"
-      ? `Because an equal number of plots was assumed at every size, the prior contributes nothing: the posterior has the same shape as the likelihood, and the two curves coincide. The credible interval consequently falls almost exactly where the confidence interval does. <b>The numerical agreement conceals a difference in meaning.</b> The statement "there is a ${cPct()}% probability that N lies between ${fmt(post.q.lo)} and ${fmt(post.q.hi)}" is a correct reading of the posterior. It is not a correct reading of the confidence interval, which asserts only that a procedure of this kind brackets the true value on ${cPct()}% of occasions — the property measured in section 4.`
+      ? `Because an equal number of plots was assumed at every size, the prior contributes nothing: the posterior has the same shape as the likelihood, and the two curves coincide. The credible interval consequently falls almost exactly where the confidence interval does. <b>The numerical agreement conceals a difference in meaning.</b> The statement "there is a ${cPct()}% probability that N lies between ${fmt(post.q.lo)} and ${fmt(post.q.hi)}" is a correct reading of the posterior. It is not a correct reading of the confidence interval, which asserts only that a procedure of this kind brackets the true value on ${cPct()}% of occasions — the property measured in Section 4.`
       : priorKind === "last"
         ? `The previous year's estimate of ${fmt(spec.lastYear)} draws the posterior towards itself. ${Math.abs(shift) < 0.02 ? "The effect here is slight, because the current data are informative enough to dominate it." : "The estimate moves by " + Math.abs(shift*100).toFixed(0) + "%, and that displacement originates in the earlier survey rather than in the present one."} A prior constitutes evidence, and using it as such is legitimate; what is not legitimate is failing to declare that it has been used.`
-        : `A territory requirement of ${spec.terr} m² imposes a ceiling of ${fmt(spec.capacity)} on the plot, and the posterior terminates there. ${spec.capacity < pop.N ? `The ceiling lies below the true value of ${pop.N}. The prior has therefore assigned zero probability to the correct answer, and no quantity of data collected under it could recover: multiplying a likelihood by zero yields zero. A prior containing a zero asserts impossibility, which is the strongest claim available in statistics and the easiest to make inadvertently.` : `The ceiling lies above the true value, so it costs nothing in this instance. Had the plot been more crowded than assumed, the same prior would have excluded the correct answer entirely.`}`) +
-    `<br><br>On this occasion the credible interval ${covB ? "contains" : "<b>excludes</b>"} the true value of ${pop.N} and the confidence interval ${covF ? "contains" : "<b>excludes</b>"} it. Neither outcome is informative in isolation, for the reason established in section 4, and the point applies to both kinds of interval.`;
+        : `A territory requirement of ${spec.terr} m² per oryx imposes a ceiling of ${fmt(spec.capacity)} on the population size, and the posterior terminates there. ${spec.capacity < pop.N ? `The ceiling lies below the true value of ${pop.N}. The prior has therefore assigned zero probability to the correct answer, and no quantity of data collected under it could recover: multiplying a likelihood by zero yields zero. A prior containing a zero asserts impossibility, which is the strongest claim available in statistics and the easiest to make inadvertently.` : `The ceiling lies above the true value, so it costs nothing in this instance. Had the territory sizes been smaller than assumed, the same prior would have excluded the correct answer entirely.`}`) +
+    `<br><br>On this occasion the credible interval ${covB ? "contains" : "<b>excludes</b>"} the true value of ${pop.N} and the confidence interval ${covF ? "contains" : "<b>excludes</b>"} it.`;
 }
 function drawPosterior(post, flat, spec, ci){
   const Wd = 760, Ht = 300, L2 = 50, R = 18, T = 44, B = 74, pw = Wd-L2-R, ph = Ht-T-B;
@@ -1729,7 +1728,7 @@ function renderCap(spec){
   const thinLow = posterior(meagre.L, "flat", spec, Math.max(1000, cap/4));
   const tracks = thin.q.hi > thinLow.q.hi*1.6;
   $("capnote").innerHTML = tracks
-    ? `The upper limit obtained from the sparse survey rises as the assumed ceiling is raised, which means that limit is determined by the assumption rather than by the field data. With ${evidence} the observations cannot exclude a very large population, so whatever bound the prior imposes becomes the answer. The interval from the fuller survey is unaffected, the data there being sufficient to bound N from above without assistance.`
+    ? `The upper limit obtained from the sparse survey (orange) rises as the assumed ceiling is raised, which means that limit is determined by the assumption rather than by the field data. With ${evidence} the observations cannot exclude a very large population, so whatever bound the prior imposes becomes part of the answer. The interval from the larger survey (green) is unaffected, since the data there is sufficient to bound N from above without assistance from the prior.`
     : (m === "mr"
       ? `Both intervals are now insensitive to the ceiling: the data are informative enough that the prior is immaterial. Lowering the ceiling far enough will restore its influence.`
       : `Neither interval responds to the ceiling at any setting, and for this design none ever will. The behaviour is a property of the survey method rather than of Bayesian inference as such. ${m === "quad" ? "The proportion of the plot searched is known exactly" : "The detection function and the length of line walked are both known"}, so the data bound N from above as firmly as from below. Mark–recapture affords no such guarantee: there the sampling fraction is itself unknown and must be inferred from m₂, and when recaptures are few the data place no upper bound on N at all. Selecting mark–recapture, running a low-effort survey and returning to this control will demonstrate the contrast.`);
@@ -1796,12 +1795,12 @@ const GATE = {
   4: "Draw the 500 replicate surveys in section 4 first."
 };
 const NEXTUP = {
-  next1: [2, "Section 3 becomes available once an estimate has been recorded and N revealed.",
-             "<b>Section 3 is now available</b>, in which an interval is derived by an explicit procedure rather than by judgement."],
-  next2: [3, "Section 4 becomes available once the candidate values have been evaluated and an interval constructed.",
-             "<b>Section 4 is now available</b>, in which the long-run behaviour of the procedure just used is examined."],
+  next1: [2, "Section 3 becomes available once an estimate has been recorded and the true N revealed.",
+             "<b>Section 3 is now available</b>, in which an interval is derived by a rigorous procedure rather than by subjective judgment."],
+  next2: [3, "Section 4 becomes available once the candidate population sizes have been evaluated and a confidence interval has been constructed.",
+             "<b>Section 4 is now available</b>, in which confidence intervals are observed across many replicates of the experiment."],
   next3: [4, "Section 5 becomes available once the replicate surveys have been drawn.",
-             "<b>Section 5 is now available</b>, in which the direction of the probability statement is reversed."]
+             "<b>Section 5 is now available</b>, in which we look at Bayesian inference and learn how it differs from traditional 'frequentist' statistics."]
 };
 function lockRail(on){
   $("rail").classList.toggle("locked", on);
